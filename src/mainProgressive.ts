@@ -82,6 +82,67 @@ const timeValue = document.getElementById('time-value')!;
 // Debounce timer for slider updates
 let updateTimer: number | null = null;
 
+// Auto mode state
+let isAutoMode = true;
+let lastAutoLevel = -1;
+let autoUpdatePending = false;
+
+/**
+ * Calculate the appropriate resolution level based on camera distance
+ * Closer = finer resolution (level 0), farther = coarser (higher levels)
+ */
+function calculateLevelFromZoom(): number {
+    if (!progressiveVolume) return 0;
+
+    const numLevels = progressiveVolume.getNumLevels();
+    const distance = camera.position.length();
+
+    // Distance thresholds for each level
+    // At close range (< 1), use full resolution
+    // At far range (> 4), use coarsest
+    const minDist = 0.8;
+    const maxDist = 4.0;
+
+    // Normalize distance to 0-1 range
+    const t = Math.max(0, Math.min(1, (distance - minDist) / (maxDist - minDist)));
+
+    // Map to level (0 = finest, numLevels-1 = coarsest)
+    const level = Math.floor(t * numLevels);
+    return Math.min(level, numLevels - 1);
+}
+
+/**
+ * Update the auto mode dropdown text to show current level
+ */
+function updateAutoModeText(level: number): void {
+    const autoOption = resolutionSelect.options[0];
+    if (autoOption && autoOption.value === 'auto') {
+        const scale = Math.pow(2, level);
+        const levelText = level === 0 ? 'Full' : `1/${scale}x`;
+        autoOption.textContent = `Auto (${levelText})`;
+    }
+}
+
+/**
+ * Handle zoom changes in auto mode
+ */
+async function handleZoomChange(): Promise<void> {
+    if (!isAutoMode || !progressiveVolume || autoUpdatePending) return;
+
+    const newLevel = calculateLevelFromZoom();
+
+    if (newLevel !== lastAutoLevel) {
+        autoUpdatePending = true;
+        lastAutoLevel = newLevel;
+
+        console.log(`[Auto] Zoom level changed, switching to level ${newLevel}`);
+        updateAutoModeText(newLevel);
+
+        await progressiveVolume.setLevel(newLevel);
+        autoUpdatePending = false;
+    }
+}
+
 // Load progressive seismic data
 async function loadProgressiveData() {
     try {
@@ -146,8 +207,10 @@ async function loadProgressiveData() {
         // Hide loading overlay
         loadingOverlay.classList.add('hidden');
 
-        // Start progressive refinement to full resolution
-        await progressiveVolume.refineToLevel(0);
+        // Start in auto mode - set initial level based on current zoom
+        lastAutoLevel = calculateLevelFromZoom();
+        updateAutoModeText(lastAutoLevel);
+        await progressiveVolume.setLevel(lastAutoLevel);
 
     } catch (error) {
         console.error('Error loading progressive data:', error);
@@ -203,12 +266,20 @@ async function handleResolutionChange() {
     const value = resolutionSelect.value;
 
     if (value === 'auto') {
-        // Progressive refinement to full resolution
-        console.log('[UI] Auto mode selected - refining to full resolution');
-        await progressiveVolume.refineToLevel(0);
+        // Enable auto mode based on zoom
+        isAutoMode = true;
+        console.log('[UI] Auto mode enabled');
+
+        // Immediately apply zoom-based level
+        const newLevel = calculateLevelFromZoom();
+        lastAutoLevel = newLevel;
+        updateAutoModeText(newLevel);
+        await progressiveVolume.setLevel(newLevel);
         return;
     }
 
+    // Manual mode
+    isAutoMode = false;
     const level = parseInt(value);
     console.log(`[UI] Manual level selected: ${level}`);
     await progressiveVolume.setLevel(level);
@@ -233,6 +304,12 @@ window.addEventListener('resize', () => {
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
+
+    // Check for zoom changes in auto mode
+    if (isAutoMode && progressiveVolume) {
+        handleZoomChange();
+    }
+
     renderer.render(scene, camera);
 }
 
