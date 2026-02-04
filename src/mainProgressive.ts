@@ -87,6 +87,12 @@ let isAutoMode = true;
 let lastAutoLevel = -1;
 let autoUpdatePending = false;
 
+// Interactive update state
+let interactionLevel = 2; // Use 1/4x resolution during slider interaction
+let savedLevel = 0;       // Level to restore after interaction
+let isInteracting = false;
+let interactionTimer: number | null = null;
+
 /**
  * Calculate the appropriate resolution level based on camera distance
  * Closer = finer resolution (level 0), farther = coarser (higher levels)
@@ -251,7 +257,73 @@ function debouncedUpdateSlices() {
     updateTimer = window.setTimeout(async () => {
         await updateSlices();
         updateTimer = null;
-    }, 50); // 50ms debounce for smooth slider interaction
+    }, 100); // 100ms debounce for smooth slider interaction
+}
+
+/**
+ * Fast update during slider drag - uses coarser resolution
+ */
+async function interactiveSliderUpdate() {
+    updateSliderDisplays();
+
+    if (!progressiveVolume) return;
+
+    // Switch to interaction level on first drag
+    if (!isInteracting && !isAutoMode) {
+        isInteracting = true;
+        savedLevel = progressiveVolume.getCurrentLevel();
+
+        // Only switch to coarse if we're at a finer level
+        if (savedLevel < interactionLevel) {
+            console.log(`[Perf] Switching to interaction level ${interactionLevel}`);
+            await progressiveVolume.setLevel(interactionLevel);
+        }
+    }
+
+    // Clear any pending full-resolution update
+    if (interactionTimer !== null) {
+        clearTimeout(interactionTimer);
+    }
+
+    // Throttled coarse update
+    if (updateTimer !== null) {
+        clearTimeout(updateTimer);
+    }
+
+    updateTimer = window.setTimeout(async () => {
+        if (!progressiveVolume) return;
+
+        const inlinePos = parseInt(inlineSlider.value);
+        const crosslinePos = parseInt(crosslineSlider.value);
+        const timePos = parseInt(timeSlider.value);
+        const opacity = parseInt(opacitySlider.value) / 100;
+
+        await progressiveVolume.updateSlices(inlinePos, crosslinePos, timePos, opacity);
+        updateTimer = null;
+    }, 30); // Fast updates during interaction
+}
+
+/**
+ * Final update when slider is released - restores full resolution
+ */
+async function finalSliderUpdate() {
+    // Schedule return to full resolution after interaction ends
+    if (interactionTimer !== null) {
+        clearTimeout(interactionTimer);
+    }
+
+    interactionTimer = window.setTimeout(async () => {
+        if (!progressiveVolume || !isInteracting) return;
+
+        console.log(`[Perf] Restoring level ${savedLevel}`);
+        isInteracting = false;
+
+        // Restore previous level
+        await progressiveVolume.setLevel(savedLevel);
+        await updateSlices();
+
+        interactionTimer = null;
+    }, 150); // Small delay to catch rapid slider adjustments
 }
 
 async function updateColormap() {
@@ -285,10 +357,13 @@ async function handleResolutionChange() {
     await progressiveVolume.setLevel(level);
 }
 
-// Event listeners
-inlineSlider.addEventListener('input', debouncedUpdateSlices);
-crosslineSlider.addEventListener('input', debouncedUpdateSlices);
-timeSlider.addEventListener('input', debouncedUpdateSlices);
+// Event listeners - use coarse updates during drag, full resolution on release
+inlineSlider.addEventListener('input', interactiveSliderUpdate);
+crosslineSlider.addEventListener('input', interactiveSliderUpdate);
+timeSlider.addEventListener('input', interactiveSliderUpdate);
+inlineSlider.addEventListener('change', finalSliderUpdate);
+crosslineSlider.addEventListener('change', finalSliderUpdate);
+timeSlider.addEventListener('change', finalSliderUpdate);
 opacitySlider.addEventListener('input', debouncedUpdateSlices);
 colormapSelect.addEventListener('change', updateColormap);
 resolutionSelect.addEventListener('change', handleResolutionChange);
