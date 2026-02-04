@@ -42,6 +42,12 @@ interface LoadedBrick {
   z: number;
 }
 
+export interface CacheConfig {
+  maxBricks: number;       // Max number of bricks (default: 100)
+  maxMemoryMB: number;     // Max memory in MB (default: 256)
+  evictOnLevelChange: boolean;  // Clear other levels on switch (default: true)
+}
+
 type LoadingCallback = (progress: number, level: number) => void;
 
 export class BrickManager {
@@ -50,6 +56,15 @@ export class BrickManager {
   private brickCache: Map<string, LoadedBrick> = new Map();
   private loadingPromises: Map<string, Promise<LoadedBrick>> = new Map();
   private onProgress: LoadingCallback | null = null;
+
+  // LRU cache tracking
+  private accessOrder: string[] = [];  // LRU order: oldest first, newest last
+  private cacheMemoryBytes: number = 0;
+  private cacheConfig: CacheConfig = {
+    maxBricks: 100,
+    maxMemoryMB: 256,
+    evictOnLevelChange: true
+  };
 
   constructor(basePath: string = '/data/bricks') {
     this.basePath = basePath;
@@ -143,8 +158,9 @@ export class BrickManager {
   async loadBrick(level: number, x: number, y: number, z: number): Promise<LoadedBrick> {
     const key = this.getBrickKey(level, x, y, z);
 
-    // Return cached brick
+    // Return cached brick (and update access order)
     if (this.brickCache.has(key)) {
+      this.updateAccessOrder(key);
       return this.brickCache.get(key)!;
     }
 
@@ -159,7 +175,15 @@ export class BrickManager {
 
     try {
       const brick = await promise;
+
+      // Add to cache with memory tracking
       this.brickCache.set(key, brick);
+      this.cacheMemoryBytes += brick.data.byteLength;
+      this.updateAccessOrder(key);
+
+      // Enforce cache limits
+      this.enforceLimit();
+
       return brick;
     } finally {
       this.loadingPromises.delete(key);
@@ -398,24 +422,110 @@ export class BrickManager {
     return { data: result, width: ny, height: nx };
   }
 
+  // ========== LRU Cache Management ==========
+
   /**
-   * Clear the brick cache
+   * Configure cache limits
+   */
+  setCacheConfig(config: Partial<CacheConfig>): void {
+    this.cacheConfig = { ...this.cacheConfig, ...config };
+    console.log(`[Cache] Config updated:`, this.cacheConfig);
+    // Enforce new limits
+    this.enforceLimit();
+  }
+
+  /**
+   * Get current cache configuration
+   */
+  getCacheConfig(): CacheConfig {
+    return { ...this.cacheConfig };
+  }
+
+  /**
+   * Update access order for LRU tracking (move to end = most recent)
+   */
+  private updateAccessOrder(key: string): void {
+    const idx = this.accessOrder.indexOf(key);
+    if (idx !== -1) {
+      this.accessOrder.splice(idx, 1);
+    }
+    this.accessOrder.push(key);
+  }
+
+  /**
+   * Enforce cache limits by evicting LRU entries
+   */
+  private enforceLimit(): void {
+    const maxMemoryBytes = this.cacheConfig.maxMemoryMB * 1024 * 1024;
+
+    while (
+      (this.brickCache.size > this.cacheConfig.maxBricks ||
+        this.cacheMemoryBytes > maxMemoryBytes) &&
+      this.accessOrder.length > 0
+    ) {
+      const oldestKey = this.accessOrder.shift();
+      if (oldestKey) {
+        this.evictBrick(oldestKey);
+      }
+    }
+  }
+
+  /**
+   * Evict a single brick by key
+   */
+  private evictBrick(key: string): void {
+    const brick = this.brickCache.get(key);
+    if (brick) {
+      this.cacheMemoryBytes -= brick.data.byteLength;
+      this.brickCache.delete(key);
+      console.log(`[Cache] Evicted: ${key}`);
+    }
+  }
+
+  /**
+   * Evict all bricks from a specific level
+   */
+  evictLevel(level: number): void {
+    const keysToEvict: string[] = [];
+
+    for (const key of this.brickCache.keys()) {
+      if (key.startsWith(`${level}_`)) {
+        keysToEvict.push(key);
+      }
+    }
+
+    for (const key of keysToEvict) {
+      this.evictBrick(key);
+      const idx = this.accessOrder.indexOf(key);
+      if (idx !== -1) {
+        this.accessOrder.splice(idx, 1);
+      }
+    }
+
+    if (keysToEvict.length > 0) {
+      console.log(`[Cache] Evicted ${keysToEvict.length} bricks from level ${level}`);
+    }
+  }
+
+  /**
+   * Clear the entire brick cache
    */
   clearCache(): void {
     this.brickCache.clear();
+    this.accessOrder = [];
+    this.cacheMemoryBytes = 0;
+    console.log('[Cache] Cleared all bricks');
   }
 
   /**
    * Get cache statistics
    */
-  getCacheStats(): { numBricks: number; estimatedSizeMB: number } {
-    let totalSize = 0;
-    for (const brick of this.brickCache.values()) {
-      totalSize += brick.data.byteLength;
-    }
+  getCacheStats(): { numBricks: number; memoryMB: number; maxBricks: number; maxMemoryMB: number } {
     return {
       numBricks: this.brickCache.size,
-      estimatedSizeMB: totalSize / 1024 / 1024
+      memoryMB: this.cacheMemoryBytes / 1024 / 1024,
+      maxBricks: this.cacheConfig.maxBricks,
+      maxMemoryMB: this.cacheConfig.maxMemoryMB
     };
   }
 }

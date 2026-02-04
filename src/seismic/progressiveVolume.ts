@@ -151,6 +151,16 @@ export class ProgressiveSeismicVolume {
 
         console.log(`[Progressive] Switching to level ${targetLevel} (current: ${this.currentLevel})`);
 
+        // Evict bricks from other levels to free memory (if configured)
+        const config = this.brickManager.getCacheConfig();
+        if (config.evictOnLevelChange && targetLevel !== this.currentLevel) {
+            for (let l = 0; l < manifest.num_levels; l++) {
+                if (l !== targetLevel) {
+                    this.brickManager.evictLevel(l);
+                }
+            }
+        }
+
         // Load the target level directly
         await this.loadLevel(targetLevel);
         await this.updateSlices(this.inlinePos, this.crosslinePos, this.timePos, this.opacity);
