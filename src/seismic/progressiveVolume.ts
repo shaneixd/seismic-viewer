@@ -108,6 +108,7 @@ export class ProgressiveSeismicVolume {
         if (dims) {
             const [nx, ny, nz] = dims;
             this.dimensions = { nx, ny, nz };
+            console.log(`[Progressive] Loading level ${level}: ${nx} x ${ny} x ${nz}`);
         }
 
         if (this.onLoadingState) {
@@ -118,10 +119,28 @@ export class ProgressiveSeismicVolume {
         await this.brickManager.loadLevel(level);
 
         this.isLoading = false;
+        console.log(`[Progressive] Level ${level} loaded`);
 
         if (this.onLoadingState) {
             this.onLoadingState('ready');
         }
+    }
+
+    /**
+     * Set to a specific resolution level (can go to any level)
+     */
+    async setLevel(targetLevel: number): Promise<void> {
+        const manifest = this.brickManager.getManifest();
+        if (!manifest) return;
+
+        // Clamp to valid range
+        targetLevel = Math.max(0, Math.min(targetLevel, manifest.num_levels - 1));
+
+        console.log(`[Progressive] Switching to level ${targetLevel} (current: ${this.currentLevel})`);
+
+        // Load the target level directly
+        await this.loadLevel(targetLevel);
+        await this.updateSlices(this.inlinePos, this.crosslinePos, this.timePos, this.opacity);
     }
 
     /**

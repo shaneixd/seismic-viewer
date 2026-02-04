@@ -203,13 +203,15 @@ async function handleResolutionChange() {
     const value = resolutionSelect.value;
 
     if (value === 'auto') {
-        // Progressive refinement - already done during initialization
+        // Progressive refinement to full resolution
+        console.log('[UI] Auto mode selected - refining to full resolution');
+        await progressiveVolume.refineToLevel(0);
         return;
     }
 
     const level = parseInt(value);
-    await progressiveVolume.refineToLevel(level);
-    await updateSlices();
+    console.log(`[UI] Manual level selected: ${level}`);
+    await progressiveVolume.setLevel(level);
 }
 
 // Event listeners

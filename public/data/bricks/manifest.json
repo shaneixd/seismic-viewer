@@ -1,0 +1,3011 @@
+{
+  "version": "1.0",
+  "original_dimensions": [
+    401,
+    701,
+    255
+  ],
+  "brick_size": [
+    64,
+    64,
+    64
+  ],
+  "num_levels": 4,
+  "levels": [
+    {
+      "level": 0,
+      "scale_factor": 1,
+      "dimensions": [
+        401,
+        701,
+        255
+      ],
+      "brick_size": [
+        64,
+        64,
+        64
+      ],
+      "num_bricks": [
+        7,
+        11,
+        4
+      ],
+      "total_bricks": 308
+    },
+    {
+      "level": 1,
+      "scale_factor": 2,
+      "dimensions": [
+        200,
+        350,
+        127
+      ],
+      "brick_size": [
+        64,
+        64,
+        64
+      ],
+      "num_bricks": [
+        4,
+        6,
+        2
+      ],
+      "total_bricks": 48
+    },
+    {
+      "level": 2,
+      "scale_factor": 4,
+      "dimensions": [
+        100,
+        175,
+        63
+      ],
+      "brick_size": [
+        64,
+        64,
+        64
+      ],
+      "num_bricks": [
+        2,
+        3,
+        1
+      ],
+      "total_bricks": 6
+    },
+    {
+      "level": 3,
+      "scale_factor": 8,
+      "dimensions": [
+        50,
+        87,
+        31
+      ],
+      "brick_size": [
+        64,
+        64,
+        64
+      ],
+      "num_bricks": [
+        1,
+        2,
+        1
+      ],
+      "total_bricks": 2
+    }
+  ],
+  "bricks": [
+    {
+      "level": 0,
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "filename": "level_0/brick_0_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "filename": "level_0/brick_0_0_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 0,
+      "z": 2,
+      "filename": "level_0/brick_0_0_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 0,
+      "z": 3,
+      "filename": "level_0/brick_0_0_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 1,
+      "z": 0,
+      "filename": "level_0/brick_0_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 1,
+      "z": 1,
+      "filename": "level_0/brick_0_1_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 1,
+      "z": 2,
+      "filename": "level_0/brick_0_1_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 1,
+      "z": 3,
+      "filename": "level_0/brick_0_1_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 2,
+      "z": 0,
+      "filename": "level_0/brick_0_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 2,
+      "z": 1,
+      "filename": "level_0/brick_0_2_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 2,
+      "z": 2,
+      "filename": "level_0/brick_0_2_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 2,
+      "z": 3,
+      "filename": "level_0/brick_0_2_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 3,
+      "z": 0,
+      "filename": "level_0/brick_0_3_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 3,
+      "z": 1,
+      "filename": "level_0/brick_0_3_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 3,
+      "z": 2,
+      "filename": "level_0/brick_0_3_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 3,
+      "z": 3,
+      "filename": "level_0/brick_0_3_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 4,
+      "z": 0,
+      "filename": "level_0/brick_0_4_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 4,
+      "z": 1,
+      "filename": "level_0/brick_0_4_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 4,
+      "z": 2,
+      "filename": "level_0/brick_0_4_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 4,
+      "z": 3,
+      "filename": "level_0/brick_0_4_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 5,
+      "z": 0,
+      "filename": "level_0/brick_0_5_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 5,
+      "z": 1,
+      "filename": "level_0/brick_0_5_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 5,
+      "z": 2,
+      "filename": "level_0/brick_0_5_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 5,
+      "z": 3,
+      "filename": "level_0/brick_0_5_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 6,
+      "z": 0,
+      "filename": "level_0/brick_0_6_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 6,
+      "z": 1,
+      "filename": "level_0/brick_0_6_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 6,
+      "z": 2,
+      "filename": "level_0/brick_0_6_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 6,
+      "z": 3,
+      "filename": "level_0/brick_0_6_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 7,
+      "z": 0,
+      "filename": "level_0/brick_0_7_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 7,
+      "z": 1,
+      "filename": "level_0/brick_0_7_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 7,
+      "z": 2,
+      "filename": "level_0/brick_0_7_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 7,
+      "z": 3,
+      "filename": "level_0/brick_0_7_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 8,
+      "z": 0,
+      "filename": "level_0/brick_0_8_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 8,
+      "z": 1,
+      "filename": "level_0/brick_0_8_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 8,
+      "z": 2,
+      "filename": "level_0/brick_0_8_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 8,
+      "z": 3,
+      "filename": "level_0/brick_0_8_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 9,
+      "z": 0,
+      "filename": "level_0/brick_0_9_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 9,
+      "z": 1,
+      "filename": "level_0/brick_0_9_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 9,
+      "z": 2,
+      "filename": "level_0/brick_0_9_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 9,
+      "z": 3,
+      "filename": "level_0/brick_0_9_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 10,
+      "z": 0,
+      "filename": "level_0/brick_0_10_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 10,
+      "z": 1,
+      "filename": "level_0/brick_0_10_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 10,
+      "z": 2,
+      "filename": "level_0/brick_0_10_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 0,
+      "y": 10,
+      "z": 3,
+      "filename": "level_0/brick_0_10_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 0,
+      "z": 0,
+      "filename": "level_0/brick_1_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 0,
+      "z": 1,
+      "filename": "level_0/brick_1_0_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 0,
+      "z": 2,
+      "filename": "level_0/brick_1_0_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 0,
+      "z": 3,
+      "filename": "level_0/brick_1_0_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 1,
+      "z": 0,
+      "filename": "level_0/brick_1_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 1,
+      "z": 1,
+      "filename": "level_0/brick_1_1_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 1,
+      "z": 2,
+      "filename": "level_0/brick_1_1_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 1,
+      "z": 3,
+      "filename": "level_0/brick_1_1_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 2,
+      "z": 0,
+      "filename": "level_0/brick_1_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 2,
+      "z": 1,
+      "filename": "level_0/brick_1_2_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 2,
+      "z": 2,
+      "filename": "level_0/brick_1_2_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 2,
+      "z": 3,
+      "filename": "level_0/brick_1_2_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 3,
+      "z": 0,
+      "filename": "level_0/brick_1_3_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 3,
+      "z": 1,
+      "filename": "level_0/brick_1_3_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 3,
+      "z": 2,
+      "filename": "level_0/brick_1_3_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 3,
+      "z": 3,
+      "filename": "level_0/brick_1_3_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 4,
+      "z": 0,
+      "filename": "level_0/brick_1_4_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 4,
+      "z": 1,
+      "filename": "level_0/brick_1_4_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 4,
+      "z": 2,
+      "filename": "level_0/brick_1_4_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 4,
+      "z": 3,
+      "filename": "level_0/brick_1_4_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 5,
+      "z": 0,
+      "filename": "level_0/brick_1_5_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 5,
+      "z": 1,
+      "filename": "level_0/brick_1_5_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 5,
+      "z": 2,
+      "filename": "level_0/brick_1_5_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 5,
+      "z": 3,
+      "filename": "level_0/brick_1_5_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 6,
+      "z": 0,
+      "filename": "level_0/brick_1_6_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 6,
+      "z": 1,
+      "filename": "level_0/brick_1_6_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 6,
+      "z": 2,
+      "filename": "level_0/brick_1_6_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 6,
+      "z": 3,
+      "filename": "level_0/brick_1_6_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 7,
+      "z": 0,
+      "filename": "level_0/brick_1_7_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 7,
+      "z": 1,
+      "filename": "level_0/brick_1_7_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 7,
+      "z": 2,
+      "filename": "level_0/brick_1_7_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 7,
+      "z": 3,
+      "filename": "level_0/brick_1_7_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 8,
+      "z": 0,
+      "filename": "level_0/brick_1_8_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 8,
+      "z": 1,
+      "filename": "level_0/brick_1_8_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 8,
+      "z": 2,
+      "filename": "level_0/brick_1_8_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 8,
+      "z": 3,
+      "filename": "level_0/brick_1_8_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 9,
+      "z": 0,
+      "filename": "level_0/brick_1_9_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 9,
+      "z": 1,
+      "filename": "level_0/brick_1_9_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 9,
+      "z": 2,
+      "filename": "level_0/brick_1_9_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 9,
+      "z": 3,
+      "filename": "level_0/brick_1_9_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 10,
+      "z": 0,
+      "filename": "level_0/brick_1_10_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 10,
+      "z": 1,
+      "filename": "level_0/brick_1_10_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 10,
+      "z": 2,
+      "filename": "level_0/brick_1_10_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 1,
+      "y": 10,
+      "z": 3,
+      "filename": "level_0/brick_1_10_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 0,
+      "z": 0,
+      "filename": "level_0/brick_2_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 0,
+      "z": 1,
+      "filename": "level_0/brick_2_0_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 0,
+      "z": 2,
+      "filename": "level_0/brick_2_0_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 0,
+      "z": 3,
+      "filename": "level_0/brick_2_0_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 1,
+      "z": 0,
+      "filename": "level_0/brick_2_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 1,
+      "z": 1,
+      "filename": "level_0/brick_2_1_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 1,
+      "z": 2,
+      "filename": "level_0/brick_2_1_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 1,
+      "z": 3,
+      "filename": "level_0/brick_2_1_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 2,
+      "z": 0,
+      "filename": "level_0/brick_2_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 2,
+      "z": 1,
+      "filename": "level_0/brick_2_2_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 2,
+      "z": 2,
+      "filename": "level_0/brick_2_2_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 2,
+      "z": 3,
+      "filename": "level_0/brick_2_2_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 3,
+      "z": 0,
+      "filename": "level_0/brick_2_3_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 3,
+      "z": 1,
+      "filename": "level_0/brick_2_3_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 3,
+      "z": 2,
+      "filename": "level_0/brick_2_3_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 3,
+      "z": 3,
+      "filename": "level_0/brick_2_3_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 4,
+      "z": 0,
+      "filename": "level_0/brick_2_4_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 4,
+      "z": 1,
+      "filename": "level_0/brick_2_4_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 4,
+      "z": 2,
+      "filename": "level_0/brick_2_4_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 4,
+      "z": 3,
+      "filename": "level_0/brick_2_4_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 5,
+      "z": 0,
+      "filename": "level_0/brick_2_5_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 5,
+      "z": 1,
+      "filename": "level_0/brick_2_5_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 5,
+      "z": 2,
+      "filename": "level_0/brick_2_5_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 5,
+      "z": 3,
+      "filename": "level_0/brick_2_5_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 6,
+      "z": 0,
+      "filename": "level_0/brick_2_6_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 6,
+      "z": 1,
+      "filename": "level_0/brick_2_6_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 6,
+      "z": 2,
+      "filename": "level_0/brick_2_6_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 6,
+      "z": 3,
+      "filename": "level_0/brick_2_6_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 7,
+      "z": 0,
+      "filename": "level_0/brick_2_7_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 7,
+      "z": 1,
+      "filename": "level_0/brick_2_7_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 7,
+      "z": 2,
+      "filename": "level_0/brick_2_7_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 7,
+      "z": 3,
+      "filename": "level_0/brick_2_7_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 8,
+      "z": 0,
+      "filename": "level_0/brick_2_8_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 8,
+      "z": 1,
+      "filename": "level_0/brick_2_8_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 8,
+      "z": 2,
+      "filename": "level_0/brick_2_8_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 8,
+      "z": 3,
+      "filename": "level_0/brick_2_8_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 9,
+      "z": 0,
+      "filename": "level_0/brick_2_9_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 9,
+      "z": 1,
+      "filename": "level_0/brick_2_9_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 9,
+      "z": 2,
+      "filename": "level_0/brick_2_9_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 9,
+      "z": 3,
+      "filename": "level_0/brick_2_9_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 10,
+      "z": 0,
+      "filename": "level_0/brick_2_10_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 10,
+      "z": 1,
+      "filename": "level_0/brick_2_10_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 10,
+      "z": 2,
+      "filename": "level_0/brick_2_10_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 2,
+      "y": 10,
+      "z": 3,
+      "filename": "level_0/brick_2_10_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 0,
+      "z": 0,
+      "filename": "level_0/brick_3_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 0,
+      "z": 1,
+      "filename": "level_0/brick_3_0_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 0,
+      "z": 2,
+      "filename": "level_0/brick_3_0_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 0,
+      "z": 3,
+      "filename": "level_0/brick_3_0_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 1,
+      "z": 0,
+      "filename": "level_0/brick_3_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 1,
+      "z": 1,
+      "filename": "level_0/brick_3_1_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 1,
+      "z": 2,
+      "filename": "level_0/brick_3_1_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 1,
+      "z": 3,
+      "filename": "level_0/brick_3_1_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 2,
+      "z": 0,
+      "filename": "level_0/brick_3_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 2,
+      "z": 1,
+      "filename": "level_0/brick_3_2_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 2,
+      "z": 2,
+      "filename": "level_0/brick_3_2_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 2,
+      "z": 3,
+      "filename": "level_0/brick_3_2_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 3,
+      "z": 0,
+      "filename": "level_0/brick_3_3_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 3,
+      "z": 1,
+      "filename": "level_0/brick_3_3_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 3,
+      "z": 2,
+      "filename": "level_0/brick_3_3_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 3,
+      "z": 3,
+      "filename": "level_0/brick_3_3_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 4,
+      "z": 0,
+      "filename": "level_0/brick_3_4_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 4,
+      "z": 1,
+      "filename": "level_0/brick_3_4_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 4,
+      "z": 2,
+      "filename": "level_0/brick_3_4_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 4,
+      "z": 3,
+      "filename": "level_0/brick_3_4_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 5,
+      "z": 0,
+      "filename": "level_0/brick_3_5_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 5,
+      "z": 1,
+      "filename": "level_0/brick_3_5_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 5,
+      "z": 2,
+      "filename": "level_0/brick_3_5_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 5,
+      "z": 3,
+      "filename": "level_0/brick_3_5_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 6,
+      "z": 0,
+      "filename": "level_0/brick_3_6_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 6,
+      "z": 1,
+      "filename": "level_0/brick_3_6_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 6,
+      "z": 2,
+      "filename": "level_0/brick_3_6_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 6,
+      "z": 3,
+      "filename": "level_0/brick_3_6_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 7,
+      "z": 0,
+      "filename": "level_0/brick_3_7_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 7,
+      "z": 1,
+      "filename": "level_0/brick_3_7_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 7,
+      "z": 2,
+      "filename": "level_0/brick_3_7_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 7,
+      "z": 3,
+      "filename": "level_0/brick_3_7_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 8,
+      "z": 0,
+      "filename": "level_0/brick_3_8_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 8,
+      "z": 1,
+      "filename": "level_0/brick_3_8_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 8,
+      "z": 2,
+      "filename": "level_0/brick_3_8_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 8,
+      "z": 3,
+      "filename": "level_0/brick_3_8_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 9,
+      "z": 0,
+      "filename": "level_0/brick_3_9_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 9,
+      "z": 1,
+      "filename": "level_0/brick_3_9_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 9,
+      "z": 2,
+      "filename": "level_0/brick_3_9_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 9,
+      "z": 3,
+      "filename": "level_0/brick_3_9_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 10,
+      "z": 0,
+      "filename": "level_0/brick_3_10_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 10,
+      "z": 1,
+      "filename": "level_0/brick_3_10_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 10,
+      "z": 2,
+      "filename": "level_0/brick_3_10_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 3,
+      "y": 10,
+      "z": 3,
+      "filename": "level_0/brick_3_10_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 0,
+      "z": 0,
+      "filename": "level_0/brick_4_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 0,
+      "z": 1,
+      "filename": "level_0/brick_4_0_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 0,
+      "z": 2,
+      "filename": "level_0/brick_4_0_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 0,
+      "z": 3,
+      "filename": "level_0/brick_4_0_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 1,
+      "z": 0,
+      "filename": "level_0/brick_4_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 1,
+      "z": 1,
+      "filename": "level_0/brick_4_1_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 1,
+      "z": 2,
+      "filename": "level_0/brick_4_1_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 1,
+      "z": 3,
+      "filename": "level_0/brick_4_1_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 2,
+      "z": 0,
+      "filename": "level_0/brick_4_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 2,
+      "z": 1,
+      "filename": "level_0/brick_4_2_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 2,
+      "z": 2,
+      "filename": "level_0/brick_4_2_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 2,
+      "z": 3,
+      "filename": "level_0/brick_4_2_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 3,
+      "z": 0,
+      "filename": "level_0/brick_4_3_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 3,
+      "z": 1,
+      "filename": "level_0/brick_4_3_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 3,
+      "z": 2,
+      "filename": "level_0/brick_4_3_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 3,
+      "z": 3,
+      "filename": "level_0/brick_4_3_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 4,
+      "z": 0,
+      "filename": "level_0/brick_4_4_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 4,
+      "z": 1,
+      "filename": "level_0/brick_4_4_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 4,
+      "z": 2,
+      "filename": "level_0/brick_4_4_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 4,
+      "z": 3,
+      "filename": "level_0/brick_4_4_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 5,
+      "z": 0,
+      "filename": "level_0/brick_4_5_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 5,
+      "z": 1,
+      "filename": "level_0/brick_4_5_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 5,
+      "z": 2,
+      "filename": "level_0/brick_4_5_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 5,
+      "z": 3,
+      "filename": "level_0/brick_4_5_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 6,
+      "z": 0,
+      "filename": "level_0/brick_4_6_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 6,
+      "z": 1,
+      "filename": "level_0/brick_4_6_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 6,
+      "z": 2,
+      "filename": "level_0/brick_4_6_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 6,
+      "z": 3,
+      "filename": "level_0/brick_4_6_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 7,
+      "z": 0,
+      "filename": "level_0/brick_4_7_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 7,
+      "z": 1,
+      "filename": "level_0/brick_4_7_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 7,
+      "z": 2,
+      "filename": "level_0/brick_4_7_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 7,
+      "z": 3,
+      "filename": "level_0/brick_4_7_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 8,
+      "z": 0,
+      "filename": "level_0/brick_4_8_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 8,
+      "z": 1,
+      "filename": "level_0/brick_4_8_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 8,
+      "z": 2,
+      "filename": "level_0/brick_4_8_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 8,
+      "z": 3,
+      "filename": "level_0/brick_4_8_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 9,
+      "z": 0,
+      "filename": "level_0/brick_4_9_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 9,
+      "z": 1,
+      "filename": "level_0/brick_4_9_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 9,
+      "z": 2,
+      "filename": "level_0/brick_4_9_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 9,
+      "z": 3,
+      "filename": "level_0/brick_4_9_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 10,
+      "z": 0,
+      "filename": "level_0/brick_4_10_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 10,
+      "z": 1,
+      "filename": "level_0/brick_4_10_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 10,
+      "z": 2,
+      "filename": "level_0/brick_4_10_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 4,
+      "y": 10,
+      "z": 3,
+      "filename": "level_0/brick_4_10_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 0,
+      "z": 0,
+      "filename": "level_0/brick_5_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 0,
+      "z": 1,
+      "filename": "level_0/brick_5_0_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 0,
+      "z": 2,
+      "filename": "level_0/brick_5_0_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 0,
+      "z": 3,
+      "filename": "level_0/brick_5_0_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 1,
+      "z": 0,
+      "filename": "level_0/brick_5_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 1,
+      "z": 1,
+      "filename": "level_0/brick_5_1_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 1,
+      "z": 2,
+      "filename": "level_0/brick_5_1_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 1,
+      "z": 3,
+      "filename": "level_0/brick_5_1_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 2,
+      "z": 0,
+      "filename": "level_0/brick_5_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 2,
+      "z": 1,
+      "filename": "level_0/brick_5_2_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 2,
+      "z": 2,
+      "filename": "level_0/brick_5_2_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 2,
+      "z": 3,
+      "filename": "level_0/brick_5_2_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 3,
+      "z": 0,
+      "filename": "level_0/brick_5_3_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 3,
+      "z": 1,
+      "filename": "level_0/brick_5_3_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 3,
+      "z": 2,
+      "filename": "level_0/brick_5_3_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 3,
+      "z": 3,
+      "filename": "level_0/brick_5_3_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 4,
+      "z": 0,
+      "filename": "level_0/brick_5_4_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 4,
+      "z": 1,
+      "filename": "level_0/brick_5_4_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 4,
+      "z": 2,
+      "filename": "level_0/brick_5_4_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 4,
+      "z": 3,
+      "filename": "level_0/brick_5_4_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 5,
+      "z": 0,
+      "filename": "level_0/brick_5_5_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 5,
+      "z": 1,
+      "filename": "level_0/brick_5_5_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 5,
+      "z": 2,
+      "filename": "level_0/brick_5_5_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 5,
+      "z": 3,
+      "filename": "level_0/brick_5_5_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 6,
+      "z": 0,
+      "filename": "level_0/brick_5_6_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 6,
+      "z": 1,
+      "filename": "level_0/brick_5_6_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 6,
+      "z": 2,
+      "filename": "level_0/brick_5_6_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 6,
+      "z": 3,
+      "filename": "level_0/brick_5_6_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 7,
+      "z": 0,
+      "filename": "level_0/brick_5_7_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 7,
+      "z": 1,
+      "filename": "level_0/brick_5_7_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 7,
+      "z": 2,
+      "filename": "level_0/brick_5_7_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 7,
+      "z": 3,
+      "filename": "level_0/brick_5_7_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 8,
+      "z": 0,
+      "filename": "level_0/brick_5_8_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 8,
+      "z": 1,
+      "filename": "level_0/brick_5_8_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 8,
+      "z": 2,
+      "filename": "level_0/brick_5_8_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 8,
+      "z": 3,
+      "filename": "level_0/brick_5_8_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 9,
+      "z": 0,
+      "filename": "level_0/brick_5_9_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 9,
+      "z": 1,
+      "filename": "level_0/brick_5_9_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 9,
+      "z": 2,
+      "filename": "level_0/brick_5_9_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 9,
+      "z": 3,
+      "filename": "level_0/brick_5_9_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 10,
+      "z": 0,
+      "filename": "level_0/brick_5_10_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 10,
+      "z": 1,
+      "filename": "level_0/brick_5_10_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 10,
+      "z": 2,
+      "filename": "level_0/brick_5_10_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 5,
+      "y": 10,
+      "z": 3,
+      "filename": "level_0/brick_5_10_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 0,
+      "z": 0,
+      "filename": "level_0/brick_6_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 0,
+      "z": 1,
+      "filename": "level_0/brick_6_0_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 0,
+      "z": 2,
+      "filename": "level_0/brick_6_0_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 0,
+      "z": 3,
+      "filename": "level_0/brick_6_0_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 1,
+      "z": 0,
+      "filename": "level_0/brick_6_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 1,
+      "z": 1,
+      "filename": "level_0/brick_6_1_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 1,
+      "z": 2,
+      "filename": "level_0/brick_6_1_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 1,
+      "z": 3,
+      "filename": "level_0/brick_6_1_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 2,
+      "z": 0,
+      "filename": "level_0/brick_6_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 2,
+      "z": 1,
+      "filename": "level_0/brick_6_2_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 2,
+      "z": 2,
+      "filename": "level_0/brick_6_2_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 2,
+      "z": 3,
+      "filename": "level_0/brick_6_2_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 3,
+      "z": 0,
+      "filename": "level_0/brick_6_3_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 3,
+      "z": 1,
+      "filename": "level_0/brick_6_3_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 3,
+      "z": 2,
+      "filename": "level_0/brick_6_3_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 3,
+      "z": 3,
+      "filename": "level_0/brick_6_3_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 4,
+      "z": 0,
+      "filename": "level_0/brick_6_4_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 4,
+      "z": 1,
+      "filename": "level_0/brick_6_4_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 4,
+      "z": 2,
+      "filename": "level_0/brick_6_4_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 4,
+      "z": 3,
+      "filename": "level_0/brick_6_4_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 5,
+      "z": 0,
+      "filename": "level_0/brick_6_5_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 5,
+      "z": 1,
+      "filename": "level_0/brick_6_5_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 5,
+      "z": 2,
+      "filename": "level_0/brick_6_5_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 5,
+      "z": 3,
+      "filename": "level_0/brick_6_5_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 6,
+      "z": 0,
+      "filename": "level_0/brick_6_6_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 6,
+      "z": 1,
+      "filename": "level_0/brick_6_6_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 6,
+      "z": 2,
+      "filename": "level_0/brick_6_6_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 6,
+      "z": 3,
+      "filename": "level_0/brick_6_6_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 7,
+      "z": 0,
+      "filename": "level_0/brick_6_7_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 7,
+      "z": 1,
+      "filename": "level_0/brick_6_7_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 7,
+      "z": 2,
+      "filename": "level_0/brick_6_7_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 7,
+      "z": 3,
+      "filename": "level_0/brick_6_7_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 8,
+      "z": 0,
+      "filename": "level_0/brick_6_8_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 8,
+      "z": 1,
+      "filename": "level_0/brick_6_8_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 8,
+      "z": 2,
+      "filename": "level_0/brick_6_8_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 8,
+      "z": 3,
+      "filename": "level_0/brick_6_8_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 9,
+      "z": 0,
+      "filename": "level_0/brick_6_9_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 9,
+      "z": 1,
+      "filename": "level_0/brick_6_9_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 9,
+      "z": 2,
+      "filename": "level_0/brick_6_9_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 9,
+      "z": 3,
+      "filename": "level_0/brick_6_9_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 10,
+      "z": 0,
+      "filename": "level_0/brick_6_10_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 10,
+      "z": 1,
+      "filename": "level_0/brick_6_10_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 10,
+      "z": 2,
+      "filename": "level_0/brick_6_10_2.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 0,
+      "x": 6,
+      "y": 10,
+      "z": 3,
+      "filename": "level_0/brick_6_10_3.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "filename": "level_1/brick_0_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 0,
+      "z": 1,
+      "filename": "level_1/brick_0_0_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 1,
+      "z": 0,
+      "filename": "level_1/brick_0_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 1,
+      "z": 1,
+      "filename": "level_1/brick_0_1_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 2,
+      "z": 0,
+      "filename": "level_1/brick_0_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 2,
+      "z": 1,
+      "filename": "level_1/brick_0_2_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 3,
+      "z": 0,
+      "filename": "level_1/brick_0_3_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 3,
+      "z": 1,
+      "filename": "level_1/brick_0_3_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 4,
+      "z": 0,
+      "filename": "level_1/brick_0_4_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 4,
+      "z": 1,
+      "filename": "level_1/brick_0_4_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 5,
+      "z": 0,
+      "filename": "level_1/brick_0_5_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 0,
+      "y": 5,
+      "z": 1,
+      "filename": "level_1/brick_0_5_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 0,
+      "z": 0,
+      "filename": "level_1/brick_1_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 0,
+      "z": 1,
+      "filename": "level_1/brick_1_0_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 1,
+      "z": 0,
+      "filename": "level_1/brick_1_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 1,
+      "z": 1,
+      "filename": "level_1/brick_1_1_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 2,
+      "z": 0,
+      "filename": "level_1/brick_1_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 2,
+      "z": 1,
+      "filename": "level_1/brick_1_2_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 3,
+      "z": 0,
+      "filename": "level_1/brick_1_3_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 3,
+      "z": 1,
+      "filename": "level_1/brick_1_3_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 4,
+      "z": 0,
+      "filename": "level_1/brick_1_4_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 4,
+      "z": 1,
+      "filename": "level_1/brick_1_4_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 5,
+      "z": 0,
+      "filename": "level_1/brick_1_5_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 1,
+      "y": 5,
+      "z": 1,
+      "filename": "level_1/brick_1_5_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 0,
+      "z": 0,
+      "filename": "level_1/brick_2_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 0,
+      "z": 1,
+      "filename": "level_1/brick_2_0_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 1,
+      "z": 0,
+      "filename": "level_1/brick_2_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 1,
+      "z": 1,
+      "filename": "level_1/brick_2_1_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 2,
+      "z": 0,
+      "filename": "level_1/brick_2_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 2,
+      "z": 1,
+      "filename": "level_1/brick_2_2_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 3,
+      "z": 0,
+      "filename": "level_1/brick_2_3_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 3,
+      "z": 1,
+      "filename": "level_1/brick_2_3_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 4,
+      "z": 0,
+      "filename": "level_1/brick_2_4_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 4,
+      "z": 1,
+      "filename": "level_1/brick_2_4_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 5,
+      "z": 0,
+      "filename": "level_1/brick_2_5_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 2,
+      "y": 5,
+      "z": 1,
+      "filename": "level_1/brick_2_5_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 0,
+      "z": 0,
+      "filename": "level_1/brick_3_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 0,
+      "z": 1,
+      "filename": "level_1/brick_3_0_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 1,
+      "z": 0,
+      "filename": "level_1/brick_3_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 1,
+      "z": 1,
+      "filename": "level_1/brick_3_1_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 2,
+      "z": 0,
+      "filename": "level_1/brick_3_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 2,
+      "z": 1,
+      "filename": "level_1/brick_3_2_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 3,
+      "z": 0,
+      "filename": "level_1/brick_3_3_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 3,
+      "z": 1,
+      "filename": "level_1/brick_3_3_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 4,
+      "z": 0,
+      "filename": "level_1/brick_3_4_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 4,
+      "z": 1,
+      "filename": "level_1/brick_3_4_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 5,
+      "z": 0,
+      "filename": "level_1/brick_3_5_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 1,
+      "x": 3,
+      "y": 5,
+      "z": 1,
+      "filename": "level_1/brick_3_5_1.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 2,
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "filename": "level_2/brick_0_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 2,
+      "x": 0,
+      "y": 1,
+      "z": 0,
+      "filename": "level_2/brick_0_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 2,
+      "x": 0,
+      "y": 2,
+      "z": 0,
+      "filename": "level_2/brick_0_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 2,
+      "x": 1,
+      "y": 0,
+      "z": 0,
+      "filename": "level_2/brick_1_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 2,
+      "x": 1,
+      "y": 1,
+      "z": 0,
+      "filename": "level_2/brick_1_1_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 2,
+      "x": 1,
+      "y": 2,
+      "z": 0,
+      "filename": "level_2/brick_1_2_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 3,
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "filename": "level_3/brick_0_0_0.bin",
+      "byte_size": 1048588
+    },
+    {
+      "level": 3,
+      "x": 0,
+      "y": 1,
+      "z": 0,
+      "filename": "level_3/brick_0_1_0.bin",
+      "byte_size": 1048588
+    }
+  ],
+  "total_size_bytes": 381686032
+}
