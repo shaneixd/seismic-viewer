@@ -236,6 +236,7 @@ export class BrickManager {
   /**
    * Get a slice of data across bricks at a specific level.
    * Returns a 2D Float32Array for the slice.
+   * For inline slice: width = crossline (ny), height = time (nz) - time is vertical
    */
   async getInlineSlice(
     inlineIdx: number,
@@ -257,6 +258,7 @@ export class BrickManager {
     const brickX = Math.floor(inlineIdx / brickSizeX);
     const localX = inlineIdx % brickSizeX;
 
+    // Result: width = crossline (ny), height = time (nz)
     const result = new Float32Array(ny * nz);
     const [_numBricksX, numBricksY, numBricksZ] = levelInfo.num_bricks;
 
@@ -269,6 +271,7 @@ export class BrickManager {
         if (localX >= actualX) continue; // This brick doesn't contain our inline
 
         // Copy relevant data from brick to result
+        // Result is indexed as [time * width + crossline] so time is vertical
         for (let ly = 0; ly < actualY; ly++) {
           for (let lz = 0; lz < actualZ; lz++) {
             const globalY = by * brickSizeY + ly;
@@ -278,7 +281,8 @@ export class BrickManager {
 
             // Brick data indexing: x-major (same as original volume)
             const brickIdx = localX * brickSizeY * brickSizeZ + ly * brickSizeZ + lz;
-            const resultIdx = globalY * nz + globalZ;
+            // Result index: row = time (z), col = crossline (y)
+            const resultIdx = globalZ * ny + globalY;
 
             result[resultIdx] = brick.data[brickIdx];
           }
@@ -286,11 +290,12 @@ export class BrickManager {
       }
     }
 
-    return { data: result, width: nz, height: ny };
+    return { data: result, width: ny, height: nz };
   }
 
   /**
    * Get a crossline slice
+   * For crossline slice: width = inline (nx), height = time (nz) - time is vertical
    */
   async getCrosslineSlice(
     crosslineIdx: number,
@@ -311,6 +316,7 @@ export class BrickManager {
     const brickY = Math.floor(crosslineIdx / brickSizeY);
     const localY = crosslineIdx % brickSizeY;
 
+    // Result: width = inline (nx), height = time (nz)
     const result = new Float32Array(nx * nz);
     const [numBricksX, _numBricksY, numBricksZ] = levelInfo.num_bricks;
 
@@ -329,7 +335,8 @@ export class BrickManager {
             if (globalX >= nx || globalZ >= nz) continue;
 
             const brickIdx = lx * brickSizeY * brickSizeZ + localY * brickSizeZ + lz;
-            const resultIdx = globalX * nz + globalZ;
+            // Result index: row = time (z), col = inline (x)
+            const resultIdx = globalZ * nx + globalX;
 
             result[resultIdx] = brick.data[brickIdx];
           }
@@ -337,7 +344,7 @@ export class BrickManager {
       }
     }
 
-    return { data: result, width: nz, height: nx };
+    return { data: result, width: nx, height: nz };
   }
 
   /**
