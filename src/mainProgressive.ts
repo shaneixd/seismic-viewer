@@ -10,6 +10,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { ProgressiveSeismicVolume } from './seismic/progressiveVolume';
 import { createColormap } from './seismic/colormap';
 import type { ColormapType } from './seismic/colormap';
+import GUI from 'lil-gui';
+
+// Performance Settings (adjustable via lil-gui)
+const perfSettings = {
+    debounceMs: 100,           // Slider update debounce time in ms
+    interactionLevel: 2,       // Resolution level during slider drag (0=full, 3=coarsest)
+    enableCoarseDrag: true,    // Switch to coarse res during drag
+    showCacheStats: false      // Show cache statistics in console
+};
 
 // Scene setup
 const canvas = document.getElementById('seismic-canvas') as HTMLCanvasElement;
@@ -87,8 +96,7 @@ let isAutoMode = true;
 let lastAutoLevel = -1;
 let autoUpdatePending = false;
 
-// Interactive update state
-let interactionLevel = 2; // Use 1/4x resolution during slider interaction
+// Interactive update state (now uses perfSettings)
 let savedLevel = 0;       // Level to restore after interaction
 let isInteracting = false;
 let interactionTimer: number | null = null;
@@ -258,7 +266,7 @@ function debouncedUpdateSlices() {
     updateTimer = window.setTimeout(async () => {
         await updateSlices();
         updateTimer = null;
-    }, 100); // 100ms debounce for smooth slider interaction
+    }, perfSettings.debounceMs);
 }
 
 /**
@@ -269,15 +277,15 @@ async function interactiveSliderUpdate() {
 
     if (!progressiveVolume) return;
 
-    // Switch to interaction level on first drag
-    if (!isInteracting && !isAutoMode) {
+    // Switch to interaction level on first drag (if enabled)
+    if (!isInteracting && !isAutoMode && perfSettings.enableCoarseDrag) {
         isInteracting = true;
         savedLevel = progressiveVolume.getCurrentLevel();
 
         // Only switch to coarse if we're at a finer level
-        if (savedLevel < interactionLevel) {
-            console.log(`[Perf] Switching to interaction level ${interactionLevel}`);
-            await progressiveVolume.setLevel(interactionLevel);
+        if (savedLevel < perfSettings.interactionLevel) {
+            console.log(`[Perf] Switching to interaction level ${perfSettings.interactionLevel}`);
+            await progressiveVolume.setLevel(perfSettings.interactionLevel);
         }
     }
 
@@ -392,3 +400,28 @@ function animate() {
 // Start
 loadProgressiveData();
 animate();
+
+// Performance Settings GUI (positioned on right side)
+const gui = new GUI({ title: 'Performance Settings' });
+gui.domElement.style.position = 'fixed';
+gui.domElement.style.right = '10px';
+gui.domElement.style.top = '10px';
+
+gui.add(perfSettings, 'debounceMs', 0, 500, 10)
+    .name('Debounce (ms)');
+
+gui.add(perfSettings, 'interactionLevel', 0, 3, 1)
+    .name('Drag Resolution');
+
+gui.add(perfSettings, 'enableCoarseDrag')
+    .name('Coarse During Drag');
+
+gui.add(perfSettings, 'showCacheStats')
+    .name('Log Cache Stats')
+    .onChange((value: boolean) => {
+        if (value && progressiveVolume) {
+            const stats = progressiveVolume.getCacheStats();
+            console.log('[Cache Stats]', stats);
+        }
+    });
+

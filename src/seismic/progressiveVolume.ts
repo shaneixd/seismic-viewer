@@ -584,4 +584,11 @@ export class ProgressiveSeismicVolume {
 
         this.brickManager.clearCache();
     }
+
+    /**
+     * Get cache statistics for debugging
+     */
+    getCacheStats(): { numBricks: number; memoryMB: number; maxBricks: number; maxMemoryMB: number } {
+        return this.brickManager.getCacheStats();
+    }
 }
