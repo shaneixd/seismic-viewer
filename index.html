@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>F3 Netherlands Seismic Survey - 3D Viewer</title>
+    <meta name="description" content="Interactive 3D visualization of the F3 Netherlands North Sea seismic survey data" />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="seismic-canvas"></canvas>
+      <div id="controls">
+        <h2>F3 Netherlands Seismic</h2>
+        <div class="control-group">
+          <label>Inline Slice</label>
+          <input type="range" id="inline-slider" min="0" max="100" value="50" />
+          <span id="inline-value">50</span>
+        </div>
+        <div class="control-group">
+          <label>Crossline Slice</label>
+          <input type="range" id="crossline-slider" min="0" max="100" value="50" />
+          <span id="crossline-value">50</span>
+        </div>
+        <div class="control-group">
+          <label>Time Slice (ms)</label>
+          <input type="range" id="time-slider" min="0" max="100" value="50" />
+          <span id="time-value">50</span>
+        </div>
+        <div class="control-group">
+          <label>Opacity</label>
+          <input type="range" id="opacity-slider" min="0" max="100" value="80" />
+        </div>
+        <div class="control-group">
+          <label>Color Scale</label>
+          <select id="colormap">
+            <option value="seismic">Seismic (Red-White-Blue)</option>
+            <option value="grayscale">Grayscale</option>
+            <option value="viridis">Viridis</option>
+          </select>
+        </div>
+        <div class="info-panel">
+          <p><strong>Survey Info</strong></p>
+          <p id="survey-info">Loading data...</p>
+        </div>
+      </div>
+      <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p id="loading-text">Loading seismic data...</p>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
