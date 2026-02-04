@@ -110,6 +110,8 @@ export class ProgressiveSeismicVolume {
 
     /**
      * Load a specific resolution level
+     * For coarse levels (2+), preloads all bricks for fast overview
+     * For fine levels (0-1), skips preload - bricks load on-demand during slice extraction
      */
     private async loadLevel(level: number): Promise<void> {
         if (this.isLoading) return;
@@ -121,18 +123,26 @@ export class ProgressiveSeismicVolume {
         if (dims) {
             const [nx, ny, nz] = dims;
             this.dimensions = { nx, ny, nz };
-            console.log(`[Progressive] Loading level ${level}: ${nx} x ${ny} x ${nz}`);
+            console.log(`[Progressive] Switched to level ${level}: ${nx} x ${ny} x ${nz}`);
         }
 
-        if (this.onLoadingState) {
-            this.onLoadingState('loading', `Loading level ${level}...`);
-        }
+        // Only preload bricks for coarse levels (level 2 and above)
+        // Fine levels (0, 1) have many bricks - load on-demand during slice extraction
+        const PRELOAD_THRESHOLD = 2;
 
-        // Load the level (this caches all bricks)
-        await this.brickManager.loadLevel(level);
+        if (level >= PRELOAD_THRESHOLD) {
+            if (this.onLoadingState) {
+                this.onLoadingState('loading', `Loading level ${level}...`);
+            }
+
+            // Preload all bricks for coarse levels (fast startup)
+            await this.brickManager.loadLevel(level);
+            console.log(`[Progressive] Level ${level} preloaded`);
+        } else {
+            console.log(`[Progressive] Level ${level} - on-demand loading (no preload)`);
+        }
 
         this.isLoading = false;
-        console.log(`[Progressive] Level ${level} loaded`);
 
         if (this.onLoadingState) {
             this.onLoadingState('ready');
