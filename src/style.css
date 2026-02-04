@@ -144,6 +144,24 @@ html, body {
   font-weight: 600;
 }
 
+/* Status indicator for progressive loading */
+.status-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--accent);
+  font-style: italic;
+}
+
+.status-text.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
 /* Loading Overlay */
 #loading-overlay {
   position: absolute;

@@ -123,3 +123,24 @@ export function applyColormap(value: number, colormap: Uint8Array): RGB {
         colormap[clampedIdx * 3 + 2]
     ];
 }
+
+/**
+ * Apply colormap to an entire Float32Array and return RGBA Uint8Array
+ */
+export function applyColormapToArray(data: Float32Array, colormap: Uint8Array): Uint8Array {
+    const result = new Uint8Array(data.length * 4);
+
+    for (let i = 0; i < data.length; i++) {
+        const value = data[i];
+        // Map from -1,1 to 0,255
+        const idx = Math.floor(((value + 1) / 2) * 255);
+        const clampedIdx = Math.max(0, Math.min(255, idx));
+
+        result[i * 4] = colormap[clampedIdx * 3];
+        result[i * 4 + 1] = colormap[clampedIdx * 3 + 1];
+        result[i * 4 + 2] = colormap[clampedIdx * 3 + 2];
+        result[i * 4 + 3] = 255; // Alpha
+    }
+
+    return result;
+}
