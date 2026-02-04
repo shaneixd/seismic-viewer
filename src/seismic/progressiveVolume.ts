@@ -8,6 +8,8 @@
 import * as THREE from 'three';
 import { BrickManager } from './brickManager';
 import { applyColormapToArray } from './colormap';
+import { WorkerSliceManager } from './workerSliceManager';
+import type { SliceResult } from './workerSliceManager';
 
 interface SeismicDimensions {
     nx: number;
@@ -18,6 +20,7 @@ interface SeismicDimensions {
 interface ProgressiveVolumeOptions {
     colormap: Uint8Array;
     basePath?: string;
+    useWorker?: boolean; // Enable Web Worker for off-main-thread processing
 }
 
 type LoadingStateCallback = (state: 'loading' | 'refining' | 'ready', detail?: string) => void;
@@ -48,16 +51,26 @@ export class ProgressiveSeismicVolume {
     private isLoading: boolean = false;
     private onLoadingState: LoadingStateCallback | null = null;
 
+    // Worker support
+    private workerManager: WorkerSliceManager | null = null;
+    private useWorker: boolean = false;
+
     constructor(scene: THREE.Scene, options: ProgressiveVolumeOptions) {
         this.scene = scene;
         this.colormap = options.colormap;
         this.brickManager = new BrickManager(options.basePath || '/data/bricks');
+        this.useWorker = options.useWorker ?? false;
 
         this.brickManager.setProgressCallback((progress, level) => {
             if (this.onLoadingState) {
                 this.onLoadingState('loading', `Level ${level}: ${Math.round(progress * 100)}%`);
             }
         });
+
+        // Initialize worker if enabled
+        if (this.useWorker) {
+            this.workerManager = new WorkerSliceManager(this.brickManager, this.colormap);
+        }
     }
 
     /**
@@ -182,7 +195,7 @@ export class ProgressiveSeismicVolume {
     }
 
     /**
-     * Create a texture from slice data
+     * Create a texture from slice data (applies colormap on main thread)
      */
     private createTextureFromSlice(
         data: Float32Array,
@@ -190,7 +203,19 @@ export class ProgressiveSeismicVolume {
         height: number
     ): THREE.DataTexture {
         const rgbaData = applyColormapToArray(data, this.colormap);
+        // Convert Uint8Array to Uint8ClampedArray for compatibility
+        const clampedData = new Uint8ClampedArray(rgbaData.buffer);
+        return this.createTextureFromRGBA(clampedData, width, height);
+    }
 
+    /**
+     * Create a texture from pre-computed RGBA data (from worker)
+     */
+    private createTextureFromRGBA(
+        rgbaData: Uint8ClampedArray,
+        width: number,
+        height: number
+    ): THREE.DataTexture {
         const texture = new THREE.DataTexture(
             rgbaData,
             width,
@@ -230,7 +255,16 @@ export class ProgressiveSeismicVolume {
         const clampedCrossline = Math.max(0, Math.min(levelCrossline, this.dimensions.ny - 1));
         const clampedTime = Math.max(0, Math.min(levelTime, this.dimensions.nz - 1));
 
-        // Fetch slice data from bricks
+        // Use worker-based extraction if enabled
+        if (this.useWorker && this.workerManager) {
+            await this.updateSlicesWithWorker(
+                clampedInline, clampedCrossline, clampedTime,
+                inlinePos, crosslinePos, timePos, opacity
+            );
+            return;
+        }
+
+        // Fallback: main thread extraction
         const [inlineSlice, crosslineSlice, timeSlice] = await Promise.all([
             this.brickManager.getInlineSlice(clampedInline, this.currentLevel),
             this.brickManager.getCrosslineSlice(clampedCrossline, this.currentLevel),
@@ -245,6 +279,34 @@ export class ProgressiveSeismicVolume {
 
         // Update time slice
         this.updateTimeMesh(timeSlice, timePos, opacity);
+    }
+
+    /**
+     * Worker-based slice update (off main thread)
+     */
+    private async updateSlicesWithWorker(
+        levelInline: number, levelCrossline: number, levelTime: number,
+        inlinePos: number, crosslinePos: number, timePos: number,
+        opacity: number
+    ): Promise<void> {
+        if (!this.workerManager) return;
+
+        // Fetch slices via worker in parallel
+        const [inlineResult, crosslineResult, timeResult] = await Promise.all([
+            this.workerManager.getSlice('inline', levelInline, this.currentLevel),
+            this.workerManager.getSlice('crossline', levelCrossline, this.currentLevel),
+            this.workerManager.getSlice('time', levelTime, this.currentLevel)
+        ]);
+
+        // Create textures from worker results (already has colormap applied)
+        this.updateInlineMeshFromRGBA(inlineResult, inlinePos, opacity);
+        this.updateCrosslineMeshFromRGBA(crosslineResult, crosslinePos, opacity);
+        this.updateTimeMeshFromRGBA(timeResult, timePos, opacity);
+
+        // Schedule prefetching for adjacent slices
+        this.workerManager.prefetchAdjacent('inline', levelInline, this.currentLevel, this.dimensions.nx);
+        this.workerManager.prefetchAdjacent('crossline', levelCrossline, this.currentLevel, this.dimensions.ny);
+        this.workerManager.prefetchAdjacent('time', levelTime, this.currentLevel, this.dimensions.nz);
     }
 
     private updateInlineMesh(
@@ -338,10 +400,109 @@ export class ProgressiveSeismicVolume {
     }
 
     /**
+     * Update inline mesh from RGBA data (worker result)
+     */
+    private updateInlineMeshFromRGBA(
+        result: SliceResult,
+        inlinePos: number,
+        opacity: number
+    ): void {
+        const texture = this.createTextureFromRGBA(result.rgbaData, result.width, result.height);
+        const xPos = inlinePos / this.originalDimensions.nx - 0.5;
+
+        if (this.inlineMesh) {
+            (this.inlineMesh.material as THREE.MeshBasicMaterial).map?.dispose();
+            (this.inlineMesh.material as THREE.MeshBasicMaterial).map = texture;
+            (this.inlineMesh.material as THREE.MeshBasicMaterial).opacity = opacity;
+            this.inlineMesh.position.x = xPos;
+        } else {
+            const geometry = new THREE.PlaneGeometry(1, 1);
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: opacity
+            });
+
+            this.inlineMesh = new THREE.Mesh(geometry, material);
+            this.inlineMesh.rotation.y = Math.PI / 2;
+            this.inlineMesh.position.x = xPos;
+            this.scene.add(this.inlineMesh);
+        }
+    }
+
+    /**
+     * Update crossline mesh from RGBA data (worker result)
+     */
+    private updateCrosslineMeshFromRGBA(
+        result: SliceResult,
+        crosslinePos: number,
+        opacity: number
+    ): void {
+        const texture = this.createTextureFromRGBA(result.rgbaData, result.width, result.height);
+        const yPos = crosslinePos / this.originalDimensions.ny - 0.5;
+
+        if (this.crosslineMesh) {
+            (this.crosslineMesh.material as THREE.MeshBasicMaterial).map?.dispose();
+            (this.crosslineMesh.material as THREE.MeshBasicMaterial).map = texture;
+            (this.crosslineMesh.material as THREE.MeshBasicMaterial).opacity = opacity;
+            this.crosslineMesh.position.z = yPos;
+        } else {
+            const geometry = new THREE.PlaneGeometry(1, 1);
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: opacity
+            });
+
+            this.crosslineMesh = new THREE.Mesh(geometry, material);
+            this.crosslineMesh.position.z = yPos;
+            this.scene.add(this.crosslineMesh);
+        }
+    }
+
+    /**
+     * Update time mesh from RGBA data (worker result)
+     */
+    private updateTimeMeshFromRGBA(
+        result: SliceResult,
+        timePos: number,
+        opacity: number
+    ): void {
+        const texture = this.createTextureFromRGBA(result.rgbaData, result.width, result.height);
+        const zPos = timePos / this.originalDimensions.nz - 0.5;
+
+        if (this.timeMesh) {
+            (this.timeMesh.material as THREE.MeshBasicMaterial).map?.dispose();
+            (this.timeMesh.material as THREE.MeshBasicMaterial).map = texture;
+            (this.timeMesh.material as THREE.MeshBasicMaterial).opacity = opacity;
+            this.timeMesh.position.y = -zPos;
+        } else {
+            const geometry = new THREE.PlaneGeometry(1, 1);
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: opacity
+            });
+
+            this.timeMesh = new THREE.Mesh(geometry, material);
+            this.timeMesh.rotation.x = -Math.PI / 2;
+            this.timeMesh.position.y = -zPos;
+            this.scene.add(this.timeMesh);
+        }
+    }
+
+    /**
      * Update the colormap
      */
     setColormap(colormap: Uint8Array): void {
         this.colormap = colormap;
+        // Update worker colormap if enabled
+        if (this.workerManager) {
+            this.workerManager.setColormap(colormap);
+        }
     }
 
     /**
@@ -394,6 +555,11 @@ export class ProgressiveSeismicVolume {
             (this.boundingBox.material as THREE.LineBasicMaterial).dispose();
             this.boundingBox.geometry.dispose();
             this.scene.remove(this.boundingBox);
+        }
+
+        // Dispose worker
+        if (this.workerManager) {
+            this.workerManager.dispose();
         }
 
         this.brickManager.clearCache();

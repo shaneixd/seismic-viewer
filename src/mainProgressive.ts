@@ -156,7 +156,8 @@ async function loadProgressiveData() {
 
         progressiveVolume = new ProgressiveSeismicVolume(scene, {
             colormap: createColormap('seismic'),
-            basePath: '/data/bricks'
+            basePath: '/data/bricks',
+            useWorker: true // Enable off-main-thread slice extraction
         });
 
         // Set loading state callback

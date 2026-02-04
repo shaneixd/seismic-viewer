@@ -23,7 +23,7 @@ interface LevelInfo {
   total_bricks: number;
 }
 
-interface BrickManifest {
+export interface BrickManifest {
   version: string;
   original_dimensions: [number, number, number];
   brick_size: [number, number, number];
