@@ -46,6 +46,7 @@ export interface CacheConfig {
   maxBricks: number;       // Max number of bricks (default: 100)
   maxMemoryMB: number;     // Max memory in MB (default: 256)
   evictOnLevelChange: boolean;  // Clear other levels on switch (default: true)
+  verbose: boolean;        // Log cache events to console (default: false)
 }
 
 type LoadingCallback = (progress: number, level: number) => void;
@@ -63,7 +64,8 @@ export class BrickManager {
   private cacheConfig: CacheConfig = {
     maxBricks: 100,
     maxMemoryMB: 256,
-    evictOnLevelChange: true
+    evictOnLevelChange: true,
+    verbose: false
   };
 
   constructor(basePath: string = '/data/bricks') {
@@ -429,7 +431,9 @@ export class BrickManager {
    */
   setCacheConfig(config: Partial<CacheConfig>): void {
     this.cacheConfig = { ...this.cacheConfig, ...config };
-    console.log(`[Cache] Config updated:`, this.cacheConfig);
+    if (this.cacheConfig.verbose) {
+      console.log(`[Cache] Config updated:`, this.cacheConfig);
+    }
     // Enforce new limits
     this.enforceLimit();
   }
@@ -478,7 +482,9 @@ export class BrickManager {
     if (brick) {
       this.cacheMemoryBytes -= brick.data.byteLength;
       this.brickCache.delete(key);
-      console.log(`[Cache] Evicted: ${key}`);
+      if (this.cacheConfig.verbose) {
+        console.log(`[Cache] Evicted: ${key}`);
+      }
     }
   }
 
@@ -502,7 +508,7 @@ export class BrickManager {
       }
     }
 
-    if (keysToEvict.length > 0) {
+    if (keysToEvict.length > 0 && this.cacheConfig.verbose) {
       console.log(`[Cache] Evicted ${keysToEvict.length} bricks from level ${level}`);
     }
   }
@@ -514,7 +520,9 @@ export class BrickManager {
     this.brickCache.clear();
     this.accessOrder = [];
     this.cacheMemoryBytes = 0;
-    console.log('[Cache] Cleared all bricks');
+    if (this.cacheConfig.verbose) {
+      console.log('[Cache] Cleared all bricks');
+    }
   }
 
   /**

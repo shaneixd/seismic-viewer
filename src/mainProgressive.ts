@@ -419,9 +419,14 @@ gui.add(perfSettings, 'enableCoarseDrag')
 gui.add(perfSettings, 'showCacheStats')
     .name('Log Cache Stats')
     .onChange((value: boolean) => {
-        if (value && progressiveVolume) {
-            const stats = progressiveVolume.getCacheStats();
-            console.log('[Cache Stats]', stats);
+        if (progressiveVolume) {
+            // Update BrickManager verbose flag
+            progressiveVolume.setCacheConfig({ verbose: value });
+
+            if (value) {
+                const stats = progressiveVolume.getCacheStats();
+                console.log('[Cache Stats]', stats);
+            }
         }
     });
 
