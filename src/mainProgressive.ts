@@ -14,8 +14,8 @@ import GUI from 'lil-gui';
 
 // Performance Settings (adjustable via lil-gui)
 const perfSettings = {
-    debounceMs: 100,           // Slider update debounce time in ms
-    interactionLevel: 2,       // Resolution level during slider drag (0=full, 3=coarsest)
+    debounceMs: 0,             // Slider update debounce time in ms
+    interactionLevel: 1,       // Resolution level during slider drag (0=full, 3=coarsest)
     enableCoarseDrag: true,    // Switch to coarse res during drag
     showCacheStats: false      // Show cache statistics in console
 };
@@ -309,7 +309,7 @@ async function interactiveSliderUpdate() {
 
         await progressiveVolume.updateSlices(inlinePos, crosslinePos, timePos, opacity);
         updateTimer = null;
-    }, 30); // Fast updates during interaction
+    }, perfSettings.debounceMs); // Fast updates during interaction
 }
 
 /**
