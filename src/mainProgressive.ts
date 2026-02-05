@@ -278,7 +278,7 @@ async function interactiveSliderUpdate() {
     if (!progressiveVolume) return;
 
     // Switch to interaction level on first drag (if enabled)
-    if (!isInteracting && !isAutoMode && perfSettings.enableCoarseDrag) {
+    if (!isInteracting && perfSettings.enableCoarseDrag) {
         isInteracting = true;
         savedLevel = progressiveVolume.getCurrentLevel();
 

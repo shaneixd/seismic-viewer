@@ -34,6 +34,7 @@ export class ProgressiveSeismicVolume {
     private currentLevel: number = -1;
     private dimensions: SeismicDimensions = { nx: 0, ny: 0, nz: 0 };
     private originalDimensions: SeismicDimensions = { nx: 0, ny: 0, nz: 0 };
+    private scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1);
 
     // Slice meshes
     private inlineMesh: THREE.Mesh | null = null;
@@ -92,6 +93,10 @@ export class ProgressiveSeismicVolume {
 
         const [nx, ny, nz] = manifest.original_dimensions;
         this.originalDimensions = { nx, ny, nz };
+
+        // Calculate scale factors
+        const maxDim = Math.max(nx, ny, nz);
+        this.scale.set(nx / maxDim, nz / maxDim, ny / maxDim);
 
         // Start with coarsest level
         const coarsestLevel = manifest.num_levels - 1;
@@ -201,7 +206,7 @@ export class ProgressiveSeismicVolume {
      * Create the bounding box visualization
      */
     private createBoundingBox(): void {
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const geometry = new THREE.BoxGeometry(this.scale.x, this.scale.y, this.scale.z);
         const edges = new THREE.EdgesGeometry(geometry);
         const material = new THREE.LineBasicMaterial({
             color: 0x4488ff,
@@ -336,8 +341,8 @@ export class ProgressiveSeismicVolume {
     ): void {
         const texture = this.createTextureFromSlice(slice.data, slice.width, slice.height);
 
-        // Position as fraction of original volume
-        const xPos = inlinePos / this.originalDimensions.nx - 0.5;
+        // Position as fraction of scaled volume
+        const xPos = (inlinePos / this.originalDimensions.nx - 0.5) * this.scale.x;
 
         if (this.inlineMesh) {
             (this.inlineMesh.material as THREE.MeshBasicMaterial).map?.dispose();
@@ -345,7 +350,8 @@ export class ProgressiveSeismicVolume {
             (this.inlineMesh.material as THREE.MeshBasicMaterial).opacity = opacity;
             this.inlineMesh.position.x = xPos;
         } else {
-            const geometry = new THREE.PlaneGeometry(1, 1);
+            // Plane covering Y (time) and Z (crossline) dimensions
+            const geometry = new THREE.PlaneGeometry(this.scale.z, this.scale.y);
             const material = new THREE.MeshBasicMaterial({
                 map: texture,
                 side: THREE.DoubleSide,
@@ -367,7 +373,8 @@ export class ProgressiveSeismicVolume {
     ): void {
         const texture = this.createTextureFromSlice(slice.data, slice.width, slice.height);
 
-        const yPos = crosslinePos / this.originalDimensions.ny - 0.5;
+        // Position as fraction of scaled volume
+        const yPos = (crosslinePos / this.originalDimensions.ny - 0.5) * this.scale.z;
 
         if (this.crosslineMesh) {
             (this.crosslineMesh.material as THREE.MeshBasicMaterial).map?.dispose();
@@ -375,7 +382,8 @@ export class ProgressiveSeismicVolume {
             (this.crosslineMesh.material as THREE.MeshBasicMaterial).opacity = opacity;
             this.crosslineMesh.position.z = yPos;
         } else {
-            const geometry = new THREE.PlaneGeometry(1, 1);
+            // Plane covering X (inline) and Y (time) dimensions
+            const geometry = new THREE.PlaneGeometry(this.scale.x, this.scale.y);
             const material = new THREE.MeshBasicMaterial({
                 map: texture,
                 side: THREE.DoubleSide,
@@ -396,7 +404,8 @@ export class ProgressiveSeismicVolume {
     ): void {
         const texture = this.createTextureFromSlice(slice.data, slice.width, slice.height);
 
-        const zPos = timePos / this.originalDimensions.nz - 0.5;
+        // Position as fraction of scaled volume
+        const zPos = (timePos / this.originalDimensions.nz - 0.5) * this.scale.y;
 
         if (this.timeMesh) {
             (this.timeMesh.material as THREE.MeshBasicMaterial).map?.dispose();
@@ -404,7 +413,8 @@ export class ProgressiveSeismicVolume {
             (this.timeMesh.material as THREE.MeshBasicMaterial).opacity = opacity;
             this.timeMesh.position.y = -zPos;
         } else {
-            const geometry = new THREE.PlaneGeometry(1, 1);
+            // Plane covering X (inline) and Z (crossline) dimensions
+            const geometry = new THREE.PlaneGeometry(this.scale.x, this.scale.z);
             const material = new THREE.MeshBasicMaterial({
                 map: texture,
                 side: THREE.DoubleSide,
@@ -428,7 +438,7 @@ export class ProgressiveSeismicVolume {
         opacity: number
     ): void {
         const texture = this.createTextureFromRGBA(result.rgbaData, result.width, result.height);
-        const xPos = inlinePos / this.originalDimensions.nx - 0.5;
+        const xPos = (inlinePos / this.originalDimensions.nx - 0.5) * this.scale.x;
 
         if (this.inlineMesh) {
             (this.inlineMesh.material as THREE.MeshBasicMaterial).map?.dispose();
@@ -436,7 +446,7 @@ export class ProgressiveSeismicVolume {
             (this.inlineMesh.material as THREE.MeshBasicMaterial).opacity = opacity;
             this.inlineMesh.position.x = xPos;
         } else {
-            const geometry = new THREE.PlaneGeometry(1, 1);
+            const geometry = new THREE.PlaneGeometry(this.scale.z, this.scale.y);
             const material = new THREE.MeshBasicMaterial({
                 map: texture,
                 side: THREE.DoubleSide,
@@ -460,7 +470,7 @@ export class ProgressiveSeismicVolume {
         opacity: number
     ): void {
         const texture = this.createTextureFromRGBA(result.rgbaData, result.width, result.height);
-        const yPos = crosslinePos / this.originalDimensions.ny - 0.5;
+        const yPos = (crosslinePos / this.originalDimensions.ny - 0.5) * this.scale.z;
 
         if (this.crosslineMesh) {
             (this.crosslineMesh.material as THREE.MeshBasicMaterial).map?.dispose();
@@ -468,7 +478,7 @@ export class ProgressiveSeismicVolume {
             (this.crosslineMesh.material as THREE.MeshBasicMaterial).opacity = opacity;
             this.crosslineMesh.position.z = yPos;
         } else {
-            const geometry = new THREE.PlaneGeometry(1, 1);
+            const geometry = new THREE.PlaneGeometry(this.scale.x, this.scale.y);
             const material = new THREE.MeshBasicMaterial({
                 map: texture,
                 side: THREE.DoubleSide,
@@ -491,7 +501,7 @@ export class ProgressiveSeismicVolume {
         opacity: number
     ): void {
         const texture = this.createTextureFromRGBA(result.rgbaData, result.width, result.height);
-        const zPos = timePos / this.originalDimensions.nz - 0.5;
+        const zPos = (timePos / this.originalDimensions.nz - 0.5) * this.scale.y;
 
         if (this.timeMesh) {
             (this.timeMesh.material as THREE.MeshBasicMaterial).map?.dispose();
@@ -499,7 +509,7 @@ export class ProgressiveSeismicVolume {
             (this.timeMesh.material as THREE.MeshBasicMaterial).opacity = opacity;
             this.timeMesh.position.y = -zPos;
         } else {
-            const geometry = new THREE.PlaneGeometry(1, 1);
+            const geometry = new THREE.PlaneGeometry(this.scale.x, this.scale.z);
             const material = new THREE.MeshBasicMaterial({
                 map: texture,
                 side: THREE.DoubleSide,
