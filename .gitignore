@@ -2,6 +2,11 @@
 public/data/data/
 public/data/data.zip
 *.npy
+*.bin
+*.sgy
+*.zip
+public/data/f3_temp/
+public/data/volve_temp/
 
 # Logs
 logs

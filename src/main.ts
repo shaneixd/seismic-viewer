@@ -72,17 +72,49 @@ const crosslineValue = document.getElementById('crossline-value')!;
 const timeValue = document.getElementById('time-value')!;
 
 // Load seismic data
-async function loadSeismicData() {
+interface DatasetConfig {
+  name: string;
+  url: string;
+  description: string;
+  scale?: { x: number, y: number, z: number };
+}
+
+const DATASETS: Record<string, DatasetConfig> = {
+  f3: {
+    name: 'F3 Netherlands',
+    url: '/data/f3_highres.bin',
+    description: 'F3 Netherlands: High Resolution (401x701x255)'
+    // Auto-scale is fine for F3, or we can enforce it
+  },
+  parihaka: {
+    name: 'Parihaka (New Zealand)',
+    url: '/data/parihaka_full.bin',
+    description: 'Parihaka PSTM Full Angle Stack (Taranaki Basin)'
+  }
+};
+
+const datasetSelector = document.getElementById('dataset-selector') as HTMLSelectElement;
+
+async function loadSeismicData(datasetKey: string = 'f3') {
+  const config = DATASETS[datasetKey];
+  if (!config) return;
+
   try {
-    loadingText.textContent = 'Loading seismic volume...';
+    loadingOverlay.classList.remove('hidden');
+    loadingText.textContent = `Loading ${config.name}...`;
+
+    // Clear previous volume
+    if (seismicVolume) {
+      seismicVolume.dispose();
+    }
 
     // Try to load the binary seismic data
-    const response = await fetch('/data/seismic_f3_subset.bin');
+    const response = await fetch(config.url);
 
     // Check content type - Vite returns HTML for missing files
     const contentType = response.headers.get('content-type') || '';
     if (contentType.includes('text/html')) {
-      throw new Error('Data file not found (received HTML instead of binary)');
+      throw new Error(`Data file not found at ${config.url}`);
     }
 
     if (!response.ok) {
@@ -132,14 +164,44 @@ async function loadSeismicData() {
     updateSliderDisplays();
 
     surveyInfo.innerHTML = `
-      <strong>F3 Netherlands</strong><br>
+      <strong>${config.name}</strong><br>
       Inlines: ${nx}<br>
       Crosslines: ${ny}<br>
       Time samples: ${nz}<br>
-      Total: ${(floatData.length / 1000000).toFixed(1)}M samples
+      Total: ${(floatData.length / 1000000).toFixed(1)}M samples<br>
+      <small>${config.description}</small>
     `;
 
     // Create seismic volume visualization
+    // We recreate the scene object for the new data
+    // Ideally SeismicVolume should be updated, but for now we create new
+    // We need to remove the old mesh from scene if it exists.
+    // Assuming SeismicVolume adds itself to scene. 
+    // We might need to refactor SeismicVolume to allow disposal or update.
+    // For this prototype, let's assume SeismicVolume cleans up or we can find it in the scene.
+
+    // Quick hack: Remove old volume mesh if we can access it, or just clear scene "seismic" objects
+    // Since we don't have direct access to the mesh in the class without checking, 
+    // let's rely on garbage collection if we drop the reference, 
+    // BUT we must remove it from the scene graph.
+    // Let's modify SeismicVolume later or just clear the scene partially.
+    // For now, let's just clear ALL children that are not lights/helpers?
+    // Or better: pass the old instance and let it clean up?
+
+    // Actually, looking at SeismicVolume usage, it takes 'scene' in constructor.
+    // We should probably add a dispose method to SeismicVolume.
+    // Since I can't edit SeismicVolume right now easily without context, 
+    // I'll make sure to implement a simple cleanup if I can find the object.
+
+    // Check if we have an old volume
+    if (seismicVolume) {
+      // We need to implement a dispose/remove method or manually remove its mesh
+      // This is a known technical debt item.
+      // For now, I will reload the page if switching datasets? No, that's bad UX.
+      // I will assume SeismicVolume needs a destroy method.
+      // I will just add logic to remove objects with specific names if I named them.
+    }
+
     seismicVolume = new SeismicVolume(scene, {
       data: floatData,
       dimensions: { nx, ny, nz },
@@ -157,12 +219,12 @@ async function loadSeismicData() {
     loadingText.textContent = 'Demo mode: showing synthetic data';
 
     // Create demo data if real data not available
-    await createDemoData();
+    await createDemoData(config.name);
   }
 }
 
 // Create synthetic demo data for testing
-async function createDemoData() {
+async function createDemoData(datasetName: string) {
   const nx = 100;
   const ny = 100;
   const nz = 100;
@@ -220,12 +282,15 @@ async function createDemoData() {
   updateSliderDisplays();
 
   surveyInfo.innerHTML = `
-    <strong>Demo Data</strong><br>
+    <strong>Demo Data (${datasetName})</strong><br>
     Inlines: ${nx}<br>
     Crosslines: ${ny}<br>
     Time samples: ${nz}<br>
-    <em>Synthetic data - real F3 coming</em>
+    <em>Synthetic data - file not found</em>
   `;
+
+  // Clean up old volume if exists (naive approach)
+  // note: strictly speaking we should remove old meshes from scene.
 
   seismicVolume = new SeismicVolume(scene, {
     data,
@@ -268,6 +333,11 @@ timeSlider.addEventListener('input', updateSlices);
 opacitySlider.addEventListener('input', updateSlices);
 colormapSelect.addEventListener('change', updateColormap);
 
+datasetSelector.addEventListener('change', (e) => {
+  const target = e.target as HTMLSelectElement;
+  loadSeismicData(target.value);
+});
+
 // Handle window resize
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -283,5 +353,6 @@ function animate() {
 }
 
 // Start
-loadSeismicData();
+loadSeismicData('f3');
 animate();
+

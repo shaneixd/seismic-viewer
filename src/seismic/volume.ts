@@ -11,6 +11,7 @@ export interface SeismicVolumeOptions {
     data: Float32Array;
     dimensions: SeismicDimensions;
     colormap: Uint8Array;
+    scale?: THREE.Vector3;
 }
 
 /**
@@ -40,12 +41,17 @@ export class SeismicVolume {
         this.colormap = options.colormap;
 
         // Calculate scale to fit in unit cube centered at origin
-        const maxDim = Math.max(options.dimensions.nx, options.dimensions.ny, options.dimensions.nz);
-        this.scale = new THREE.Vector3(
-            options.dimensions.nx / maxDim,
-            options.dimensions.nz / maxDim, // Y is vertical (time/depth)
-            options.dimensions.ny / maxDim
-        );
+        // If custom scale provided, use it. Otherwise calculate proportional scale.
+        if (options.scale) {
+            this.scale = options.scale;
+        } else {
+            const maxDim = Math.max(options.dimensions.nx, options.dimensions.ny, options.dimensions.nz);
+            this.scale = new THREE.Vector3(
+                options.dimensions.nx / maxDim,
+                options.dimensions.nz / maxDim, // Y is vertical (time/depth)
+                options.dimensions.ny / maxDim
+            );
+        }
 
         this.createBoundingBox();
     }
@@ -88,9 +94,21 @@ export class SeismicVolume {
 
         for (let j = 0; j < ny; j++) {
             for (let k = 0; k < nz; k++) {
+                // Flip Time axis: k=0 (Top) should map to Row nz-1 (Top)
+                // Wait. Texture Row 0 is Bottom.
+                // We want Time=Max at Bottom (Row 0).
+                // We want Time=0 at Top (Row nz-1).
+                // So Row r aligns with Time k?
+                // Row 0 -> Time Max (nz-1)
+                // Row nz-1 -> Time 0
+
+                // Let's iterate k (Time) and map to correct row index.
+                const row = nz - 1 - k;
+
                 const value = this.getSample(inlineIdx, j, k);
                 const rgb = applyColormap(value, this.colormap);
-                const idx = (k * ny + j) * 4;
+
+                const idx = (row * ny + j) * 4;
                 pixels[idx] = rgb[0];
                 pixels[idx + 1] = rgb[1];
                 pixels[idx + 2] = rgb[2];
@@ -114,9 +132,15 @@ export class SeismicVolume {
 
         for (let i = 0; i < nx; i++) {
             for (let k = 0; k < nz; k++) {
+                // Flip Time axis
+                // Row 0 (Bottom) -> Time Max (nz-1)
+                // Row nz-1 (Top) -> Time 0
+                const row = nz - 1 - k;
+
                 const value = this.getSample(i, crosslineIdx, k);
                 const rgb = applyColormap(value, this.colormap);
-                const idx = (k * nx + i) * 4;
+
+                const idx = (row * nx + i) * 4;
                 pixels[idx] = rgb[0];
                 pixels[idx + 1] = rgb[1];
                 pixels[idx + 2] = rgb[2];
@@ -140,9 +164,15 @@ export class SeismicVolume {
 
         for (let i = 0; i < nx; i++) {
             for (let j = 0; j < ny; j++) {
+                // Flip Crossline axis (J) to match Z-axis physics
+                // J=0 should be at -Z (Top of texture, Row ny-1, because +Y maps to -Z)
+                // J=Max should be at +Z (Bottom of texture, Row 0)
+                const row = ny - 1 - j;
+
                 const value = this.getSample(i, j, timeIdx);
                 const rgb = applyColormap(value, this.colormap);
-                const idx = (j * nx + i) * 4;
+
+                const idx = (row * nx + i) * 4;
                 pixels[idx] = rgb[0];
                 pixels[idx + 1] = rgb[1];
                 pixels[idx + 2] = rgb[2];
@@ -190,7 +220,7 @@ export class SeismicVolume {
             opacity: opacity
         });
         this.inlineSlice = new THREE.Mesh(inlineGeom, inlineMat);
-        this.inlineSlice.rotation.y = Math.PI / 2;
+        this.inlineSlice.rotation.y = -Math.PI / 2;
         this.inlineSlice.position.x = (inlinePos / nx - 0.5) * this.scale.x;
         this.scene.add(this.inlineSlice);
 
