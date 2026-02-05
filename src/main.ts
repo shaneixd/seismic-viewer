@@ -2,8 +2,7 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SeismicVolume } from './seismic/volume';
-import { createColormap } from './seismic/colormap';
-import type { ColormapType } from './seismic/colormap';
+import { createColormap, AVAILABLE_COLORMAPS, type ColormapType } from './seismic/colormap';
 
 // Scene setup
 const canvas = document.getElementById('seismic-canvas') as HTMLCanvasElement;
@@ -66,6 +65,16 @@ const crosslineSlider = document.getElementById('crossline-slider') as HTMLInput
 const timeSlider = document.getElementById('time-slider') as HTMLInputElement;
 const opacitySlider = document.getElementById('opacity-slider') as HTMLInputElement;
 const colormapSelect = document.getElementById('colormap') as HTMLSelectElement;
+
+// Populate colormap options
+colormapSelect.innerHTML = '';
+AVAILABLE_COLORMAPS.forEach(map => {
+  const option = document.createElement('option');
+  option.value = map;
+  option.textContent = map.charAt(0).toUpperCase() + map.slice(1);
+  option.selected = map === 'seismic';
+  colormapSelect.appendChild(option);
+});
 
 const inlineValue = document.getElementById('inline-value')!;
 const crosslineValue = document.getElementById('crossline-value')!;

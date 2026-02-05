@@ -9,10 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "colormap": "^2.3.2",
     "lil-gui": "^0.21.0",
     "three": "^0.182.0"
   },
   "devDependencies": {
+    "@types/colormap": "^2.3.4",
     "@types/three": "^0.182.0",
     "typescript": "~5.9.3",
     "vite": "^5.4.21"

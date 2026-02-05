@@ -8,8 +8,7 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { ProgressiveSeismicVolume } from './seismic/progressiveVolume';
-import { createColormap } from './seismic/colormap';
-import type { ColormapType } from './seismic/colormap';
+import { createColormap, AVAILABLE_COLORMAPS, type ColormapType } from './seismic/colormap';
 import GUI from 'lil-gui';
 
 // Performance Settings (adjustable via lil-gui)
@@ -81,6 +80,16 @@ const crosslineSlider = document.getElementById('crossline-slider') as HTMLInput
 const timeSlider = document.getElementById('time-slider') as HTMLInputElement;
 const opacitySlider = document.getElementById('opacity-slider') as HTMLInputElement;
 const colormapSelect = document.getElementById('colormap') as HTMLSelectElement;
+
+// Populate colormap options
+colormapSelect.innerHTML = '';
+AVAILABLE_COLORMAPS.forEach(map => {
+    const option = document.createElement('option');
+    option.value = map;
+    option.textContent = map.charAt(0).toUpperCase() + map.slice(1);
+    option.selected = map === 'seismic';
+    colormapSelect.appendChild(option);
+});
 const resolutionSelect = document.getElementById('resolution-level') as HTMLSelectElement;
 const resolutionStatus = document.getElementById('resolution-status')!;
 

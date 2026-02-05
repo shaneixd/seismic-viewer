@@ -34,3 +34,8 @@ dist-ssr
 *.sw?
 # Generated bricks
 public/data/bricks/
+
+# Python venv
+.venv/
+__pycache__/
+extract_colors.py
