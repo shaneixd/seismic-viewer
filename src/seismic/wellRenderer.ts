@@ -184,6 +184,7 @@ export class WellRenderer {
 
                 const tubeMesh = new THREE.Mesh(tubeGeom, tubeMat);
                 tubeMesh.name = `stick-${well.name}`;
+                tubeMesh.userData.wellName = well.name;
                 group.add(tubeMesh);
                 this.wellSticks.set(well.name, tubeMesh);
 
@@ -197,6 +198,7 @@ export class WellRenderer {
                 });
                 const sphere = new THREE.Mesh(sphereGeom, sphereMat);
                 sphere.position.copy(surfacePoint);
+                sphere.userData.wellName = well.name;
                 group.add(sphere);
             }
         }
@@ -345,6 +347,61 @@ export class WellRenderer {
     }
 
     /**
+     * Get the world-space bounds of a well for camera framing.
+     * Returns center point, top/bottom positions, and vertical extent.
+     */
+    public getWellBounds(name: string): { center: THREE.Vector3; top: THREE.Vector3; bottom: THREE.Vector3; extent: number } | null {
+        const well = this.wells.find(w => w.name === name);
+        if (!well) return null;
+
+        const surfacePos = this.surveyToWorld(well.surface_il, well.surface_xl, 0);
+
+        if (well.trajectory.length >= 2) {
+            // Compute actual bounds from visible trajectory points
+            let minY = surfacePos.y;
+            let maxY = surfacePos.y;
+            const bottomLimit = -0.5 * this.options.scale.y;
+
+            for (const pt of well.trajectory) {
+                const worldPos = this.surveyToWorld(pt.il, pt.xl, pt.tvdss);
+                if (worldPos.y < bottomLimit) break;
+                minY = Math.min(minY, worldPos.y);
+                maxY = Math.max(maxY, worldPos.y);
+            }
+
+            const center = new THREE.Vector3(
+                surfacePos.x,
+                (maxY + minY) / 2,
+                surfacePos.z
+            );
+
+            return {
+                center,
+                top: new THREE.Vector3(surfacePos.x, maxY, surfacePos.z),
+                bottom: new THREE.Vector3(surfacePos.x, minY, surfacePos.z),
+                extent: maxY - minY,
+            };
+        }
+
+        // Fallback for wells without trajectory
+        return {
+            center: surfacePos.clone(),
+            top: surfacePos.clone(),
+            bottom: surfacePos.clone(),
+            extent: 0.2,
+        };
+    }
+
+    /**
+     * Get the world-space center position of a well (midway down its trajectory).
+     * Convenience wrapper around getWellBounds.
+     */
+    public getWellWorldPosition(name: string): THREE.Vector3 | null {
+        const bounds = this.getWellBounds(name);
+        return bounds ? bounds.center : null;
+    }
+
+    /**
      * Get well data by name.
      */
     public getWellByName(name: string): WellData | undefined {
@@ -366,6 +423,21 @@ export class WellRenderer {
         for (const [, markersGroup] of this.formationMarkers) {
             markersGroup.traverse((obj) => {
                 if (obj instanceof THREE.Mesh && obj.userData.isFormationMarker) {
+                    meshes.push(obj);
+                }
+            });
+        }
+        return meshes;
+    }
+
+    /**
+     * Get all well stick and sphere meshes for raycasting (click-to-center).
+     */
+    public getWellStickMeshes(): THREE.Mesh[] {
+        const meshes: THREE.Mesh[] = [];
+        for (const [, group] of this.wellGroups) {
+            group.traverse((obj) => {
+                if (obj instanceof THREE.Mesh && obj.userData.wellName && !obj.userData.isFormationMarker) {
                     meshes.push(obj);
                 }
             });

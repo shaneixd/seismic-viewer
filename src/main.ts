@@ -473,7 +473,7 @@ function populateWellList(wells: WellData[]): void {
     item.appendChild(name);
     item.appendChild(info);
 
-    // Click to toggle + show info
+    // Click to toggle visibility + show info
     item.addEventListener('click', () => {
       checkbox.checked = !checkbox.checked;
       if (wellRenderer) {
@@ -592,6 +592,53 @@ canvas.addEventListener('mousemove', (event: MouseEvent) => {
   canvas.style.cursor = '';
 });
 
+// Click on well in 3D to recenter camera
+let mouseDownPos = { x: 0, y: 0 };
+
+canvas.addEventListener('mousedown', (event: MouseEvent) => {
+  mouseDownPos = { x: event.clientX, y: event.clientY };
+});
+
+canvas.addEventListener('mouseup', (event: MouseEvent) => {
+  // Only trigger on actual clicks, not drags (threshold: 5px)
+  const dx = event.clientX - mouseDownPos.x;
+  const dy = event.clientY - mouseDownPos.y;
+  if (Math.sqrt(dx * dx + dy * dy) > 5) return;
+
+  if (!wellRenderer || !wellRenderer.hasWells()) return;
+
+  const clickMouse = new THREE.Vector2(
+    (event.clientX / window.innerWidth) * 2 - 1,
+    -(event.clientY / window.innerHeight) * 2 + 1
+  );
+
+  raycaster.setFromCamera(clickMouse, camera);
+
+  // Check well sticks and spheres
+  const stickMeshes = wellRenderer.getWellStickMeshes();
+  const intersects = raycaster.intersectObjects(stickMeshes, false);
+
+  if (intersects.length > 0) {
+    const wellName = intersects[0].object.userData.wellName as string;
+    if (wellName) {
+      const bounds = wellRenderer.getWellBounds(wellName);
+      if (bounds) {
+        // Preserve current viewing direction, just adjust distance to frame the well
+        const currentDir = camera.position.clone().sub(controls.target).normalize();
+        const distance = Math.max(bounds.extent * 1.8, 0.3);
+        const cameraPos = bounds.center.clone().add(currentDir.multiplyScalar(distance));
+        animateCameraToWell(bounds.center, cameraPos);
+      }
+
+      // Also show well info
+      const wellData = wellRenderer.getWellByName(wellName);
+      if (wellData) {
+        showWellInfo(wellData);
+      }
+    }
+  }
+});
+
 // Event listeners
 inlineSlider.addEventListener('input', updateSlices);
 crosslineSlider.addEventListener('input', updateSlices);
@@ -610,6 +657,43 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+// Smooth camera animation — target + position
+let cameraAnimationId: number | null = null;
+
+function animateCameraToWell(targetPos: THREE.Vector3, cameraPos: THREE.Vector3): void {
+  // Cancel any in-progress animation
+  if (cameraAnimationId !== null) {
+    cancelAnimationFrame(cameraAnimationId);
+    cameraAnimationId = null;
+  }
+
+  const startTarget = controls.target.clone();
+  const startCamPos = camera.position.clone();
+  const startTime = performance.now();
+  const duration = 700; // ms
+
+  function step() {
+    const elapsed = performance.now() - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    // Ease-in-out cubic
+    const ease = t < 0.5
+      ? 4 * t * t * t
+      : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+    controls.target.lerpVectors(startTarget, targetPos, ease);
+    camera.position.lerpVectors(startCamPos, cameraPos, ease);
+    controls.update();
+
+    if (t < 1) {
+      cameraAnimationId = requestAnimationFrame(step);
+    } else {
+      cameraAnimationId = null;
+    }
+  }
+
+  cameraAnimationId = requestAnimationFrame(step);
+}
 
 // Animation loop
 function animate() {
