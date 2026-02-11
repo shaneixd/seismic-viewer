@@ -6,6 +6,7 @@ import { createColormap, AVAILABLE_COLORMAPS, generateContrastColors, type Color
 import { WellRenderer } from './seismic/wellRenderer';
 import { loadWellData } from './seismic/wellData';
 import type { WellData } from './seismic/wellData';
+import GUI from 'lil-gui';
 
 // Scene setup
 const canvas = document.getElementById('seismic-canvas') as HTMLCanvasElement;
@@ -61,30 +62,75 @@ let seismicVolume: SeismicVolume | null = null;
 // Well renderer
 let wellRenderer: WellRenderer | null = null;
 
-// UI Elements
+// UI Elements (kept for loading overlay)
 const loadingOverlay = document.getElementById('loading-overlay')!;
 const loadingText = document.getElementById('loading-text')!;
-const surveyInfo = document.getElementById('survey-info')!;
+const wellInfoPanel = document.getElementById('well-info')!;
 
-const inlineSlider = document.getElementById('inline-slider') as HTMLInputElement;
-const crosslineSlider = document.getElementById('crossline-slider') as HTMLInputElement;
-const timeSlider = document.getElementById('time-slider') as HTMLInputElement;
-const opacitySlider = document.getElementById('opacity-slider') as HTMLInputElement;
-const colormapSelect = document.getElementById('colormap') as HTMLSelectElement;
+// lil-gui setup
+const gui = new GUI({ title: 'Seismic Viewer', width: 280 });
 
-// Populate colormap options
-colormapSelect.innerHTML = '';
+// Build colormap options as { display: value } object
+const colormapOptions: Record<string, string> = {};
 AVAILABLE_COLORMAPS.forEach(map => {
-  const option = document.createElement('option');
-  option.value = map;
-  option.textContent = map.charAt(0).toUpperCase() + map.slice(1);
-  option.selected = map === 'seismic';
-  colormapSelect.appendChild(option);
+  colormapOptions[map.charAt(0).toUpperCase() + map.slice(1)] = map;
 });
 
-const inlineValue = document.getElementById('inline-value')!;
-const crosslineValue = document.getElementById('crossline-value')!;
-const timeValue = document.getElementById('time-value')!;
+// Reactive params object for lil-gui
+const params = {
+  dataset: 'f3',
+  inline: 50,
+  crossline: 50,
+  time: 50,
+  opacity: 80,
+  colormap: 'seismic' as string,
+  showWells: true,
+  showFormations: true,
+  surveyInfo: 'Loading...',
+};
+
+// Dataset dropdown
+const datasetOptions: Record<string, string> = {
+  'F3 Netherlands': 'f3',
+  'Parihaka (NZ)': 'parihaka',
+};
+gui.add(params, 'dataset', datasetOptions).name('Dataset').onChange((value: string) => {
+  loadSeismicData(value);
+});
+
+// Slices folder
+const slicesFolder = gui.addFolder('Slices');
+const inlineCtrl = slicesFolder.add(params, 'inline', 0, 100, 1).name('Inline').onChange(updateSlices);
+const crosslineCtrl = slicesFolder.add(params, 'crossline', 0, 100, 1).name('Crossline').onChange(updateSlices);
+const timeCtrl = slicesFolder.add(params, 'time', 0, 100, 1).name('Time').onChange(updateSlices);
+
+// Display folder
+const displayFolder = gui.addFolder('Display');
+displayFolder.add(params, 'opacity', 0, 100, 1).name('Opacity').onChange(updateSlices);
+displayFolder.add(params, 'colormap', colormapOptions).name('Color Scale').onChange(() => {
+  updateColormap();
+});
+
+// Wells folder
+const wellsFolder = gui.addFolder('Wells');
+wellsFolder.add(params, 'showWells').name('Show Wells').onChange((value: boolean) => {
+  if (wellRenderer) wellRenderer.setAllVisible(value);
+});
+wellsFolder.add(params, 'showFormations').name('Show Formations').onChange((value: boolean) => {
+  if (wellRenderer) wellRenderer.setFormationsVisible(value);
+});
+
+// Custom well list container inside the wells folder
+const wellListContainer = document.createElement('div');
+wellListContainer.className = 'well-list';
+wellsFolder.$children.appendChild(wellListContainer);
+
+// Survey info folder (collapsed by default)
+const infoFolder = gui.addFolder('Survey Info');
+infoFolder.close();
+const surveyInfoCtrl = infoFolder.add(params, 'surveyInfo').name('').disable();
+surveyInfoCtrl.$widget.style.cssText = 'font-size: 11px; min-width: 0;';
+surveyInfoCtrl.domElement.style.cssText = 'height: auto; min-height: 26px;';
 
 // Load seismic data
 interface DatasetConfig {
@@ -117,7 +163,6 @@ const DATASETS: Record<string, DatasetConfig> = {
   }
 };
 
-const datasetSelector = document.getElementById('dataset-selector') as HTMLSelectElement;
 
 async function loadSeismicData(datasetKey: string = 'f3') {
   const config = DATASETS[datasetKey];
@@ -176,25 +221,20 @@ async function loadSeismicData(datasetKey: string = 'f3') {
 
     console.log(`Loaded seismic volume: ${nx} x ${ny} x ${nz} = ${floatData.length} samples`);
 
-    // Update UI
-    inlineSlider.max = String(nx - 1);
-    crosslineSlider.max = String(ny - 1);
-    timeSlider.max = String(nz - 1);
+    // Update lil-gui slider ranges
+    inlineCtrl.max(nx - 1);
+    crosslineCtrl.max(ny - 1);
+    timeCtrl.max(nz - 1);
 
-    inlineSlider.value = String(Math.floor(nx / 2));
-    crosslineSlider.value = String(Math.floor(ny / 2));
-    timeSlider.value = String(Math.floor(nz / 2));
+    params.inline = Math.floor(nx / 2);
+    params.crossline = Math.floor(ny / 2);
+    params.time = Math.floor(nz / 2);
+    inlineCtrl.updateDisplay();
+    crosslineCtrl.updateDisplay();
+    timeCtrl.updateDisplay();
 
-    updateSliderDisplays();
-
-    surveyInfo.innerHTML = `
-      <strong>${config.name}</strong><br>
-      Inlines: ${nx}<br>
-      Crosslines: ${ny}<br>
-      Time samples: ${nz}<br>
-      Total: ${(floatData.length / 1000000).toFixed(1)}M samples<br>
-      <small>${config.description}</small>
-    `;
+    params.surveyInfo = `${config.name} | ${nx}×${ny}×${nz} | ${(floatData.length / 1e6).toFixed(1)}M samples`;
+    surveyInfoCtrl.updateDisplay();
 
     // Create seismic volume visualization
     // We recreate the scene object for the new data
@@ -302,24 +342,20 @@ async function createDemoData(datasetName: string) {
     data[i] = (data[i] - min) / (max - min) * 2 - 1;
   }
 
-  // Update UI
-  inlineSlider.max = String(nx - 1);
-  crosslineSlider.max = String(ny - 1);
-  timeSlider.max = String(nz - 1);
+  // Update lil-gui slider ranges
+  inlineCtrl.max(nx - 1);
+  crosslineCtrl.max(ny - 1);
+  timeCtrl.max(nz - 1);
 
-  inlineSlider.value = String(Math.floor(nx / 2));
-  crosslineSlider.value = String(Math.floor(ny / 2));
-  timeSlider.value = String(Math.floor(nz / 2));
+  params.inline = Math.floor(nx / 2);
+  params.crossline = Math.floor(ny / 2);
+  params.time = Math.floor(nz / 2);
+  inlineCtrl.updateDisplay();
+  crosslineCtrl.updateDisplay();
+  timeCtrl.updateDisplay();
 
-  updateSliderDisplays();
-
-  surveyInfo.innerHTML = `
-    <strong>Demo Data (${datasetName})</strong><br>
-    Inlines: ${nx}<br>
-    Crosslines: ${ny}<br>
-    Time samples: ${nz}<br>
-    <em>Synthetic data - file not found</em>
-  `;
+  params.surveyInfo = `Demo (${datasetName}) | ${nx}×${ny}×${nz} | Synthetic`;
+  surveyInfoCtrl.updateDisplay();
 
   // Clean up old volume if exists (naive approach)
   // note: strictly speaking we should remove old meshes from scene.
@@ -334,27 +370,14 @@ async function createDemoData(datasetName: string) {
   loadingOverlay.classList.add('hidden');
 }
 
-function updateSliderDisplays() {
-  inlineValue.textContent = inlineSlider.value;
-  crosslineValue.textContent = crosslineSlider.value;
-  timeValue.textContent = timeSlider.value;
-}
-
 function updateSlices() {
   if (!seismicVolume) return;
-
-  const inlinePos = parseInt(inlineSlider.value);
-  const crosslinePos = parseInt(crosslineSlider.value);
-  const timePos = parseInt(timeSlider.value);
-  const opacity = parseInt(opacitySlider.value) / 100;
-
-  seismicVolume.updateSlices(inlinePos, crosslinePos, timePos, opacity);
-  updateSliderDisplays();
+  seismicVolume.updateSlices(params.inline, params.crossline, params.time, params.opacity / 100);
 }
 
 function updateColormap() {
   if (!seismicVolume) return;
-  const lut = createColormap(colormapSelect.value as ColormapType);
+  const lut = createColormap(params.colormap as ColormapType);
   seismicVolume.setColormap(lut);
   updateSlices();
 
@@ -398,11 +421,6 @@ function applyContrastColorsToWells(lut: Uint8Array): void {
   });
 }
 
-// Well loading and UI
-const wellsToggle = document.getElementById('wells-toggle') as HTMLInputElement;
-const formationsToggle = document.getElementById('formations-toggle') as HTMLInputElement;
-const wellListContainer = document.getElementById('well-list')!;
-const wellInfoPanel = document.getElementById('well-info')!;
 
 async function loadAndRenderWells(config: DatasetConfig, volume: SeismicVolume): Promise<void> {
   if (!config.wellDataUrl) return;
@@ -429,7 +447,7 @@ async function loadAndRenderWells(config: DatasetConfig, volume: SeismicVolume):
   });
 
   // Generate contrast colors based on current colormap
-  const lut = createColormap(colormapSelect.value as ColormapType);
+  const lut = createColormap(params.colormap as ColormapType);
   const contrastColors = generateContrastColors(lut, wellData.wells.length);
   for (let i = 0; i < wellData.wells.length; i++) {
     wellData.wells[i].color = contrastColors[i];
@@ -503,26 +521,13 @@ function showWellInfo(well: WellData): void {
 }
 
 function clearWellUI(): void {
-  wellListContainer.innerHTML = '<span style="font-size:11px;color:var(--text-secondary)">No wells available</span>';
+  wellListContainer.innerHTML = '<span style="font-size:11px;color:#888">No wells available</span>';
   wellInfoPanel.classList.add('hidden');
   if (wellRenderer) {
     wellRenderer.dispose();
     wellRenderer = null;
   }
 }
-
-// Well event listeners
-wellsToggle.addEventListener('change', () => {
-  if (wellRenderer) {
-    wellRenderer.setAllVisible(wellsToggle.checked);
-  }
-});
-
-formationsToggle.addEventListener('change', () => {
-  if (wellRenderer) {
-    wellRenderer.setFormationsVisible(formationsToggle.checked);
-  }
-});
 
 // Formation hover tooltip
 const raycaster = new THREE.Raycaster();
@@ -573,9 +578,9 @@ canvas.addEventListener('mousemove', (event: MouseEvent) => {
       // Highlight the hovered ring
       if (hoveredFormation && hoveredFormation !== hit) {
         // Restore previous
-        (hoveredFormation.material as THREE.MeshBasicMaterial).opacity = 0.8;
+        (hoveredFormation.material as THREE.MeshPhongMaterial).opacity = 0.8;
       }
-      (hit.material as THREE.MeshBasicMaterial).opacity = 1.0;
+      (hit.material as THREE.MeshPhongMaterial).opacity = 1.0;
       hoveredFormation = hit;
 
       canvas.style.cursor = 'pointer';
@@ -585,7 +590,7 @@ canvas.addEventListener('mousemove', (event: MouseEvent) => {
 
   // No hit — hide tooltip
   if (hoveredFormation) {
-    (hoveredFormation.material as THREE.MeshBasicMaterial).opacity = 0.8;
+    (hoveredFormation.material as THREE.MeshPhongMaterial).opacity = 0.8;
     hoveredFormation = null;
   }
   tooltip.classList.add('hidden');
@@ -637,18 +642,6 @@ canvas.addEventListener('mouseup', (event: MouseEvent) => {
       }
     }
   }
-});
-
-// Event listeners
-inlineSlider.addEventListener('input', updateSlices);
-crosslineSlider.addEventListener('input', updateSlices);
-timeSlider.addEventListener('input', updateSlices);
-opacitySlider.addEventListener('input', updateSlices);
-colormapSelect.addEventListener('change', updateColormap);
-
-datasetSelector.addEventListener('change', (e) => {
-  const target = e.target as HTMLSelectElement;
-  loadSeismicData(target.value);
 });
 
 // Handle window resize

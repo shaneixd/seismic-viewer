@@ -277,21 +277,16 @@ export class WellRenderer {
             // Skip if above volume
             if (worldPos.y > 0.5 * this.options.scale.y) continue;
 
-            // Formation disc
-            const ringGeom = new THREE.RingGeometry(0.005, 0.015, 16);
-            const ringMat = new THREE.MeshBasicMaterial({
+            // Formation disc with slight extrusion
+            const ringGeom = new THREE.CylinderGeometry(0.012, 0.012, 0.001, 24);
+            const ringMat = new THREE.MeshPhongMaterial({
                 color: new THREE.Color(fm.color),
-                side: THREE.DoubleSide,
                 transparent: true,
                 opacity: 0.8,
             });
 
             const ring = new THREE.Mesh(ringGeom, ringMat);
             ring.position.copy(worldPos);
-            ring.lookAt(ring.position.x, ring.position.y + 1, ring.position.z);
-
-            // Rotate to be horizontal
-            ring.rotation.x = -Math.PI / 2;
 
             // Store formation info for hover tooltips
             ring.userData = {
