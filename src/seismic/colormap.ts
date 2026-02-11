@@ -193,3 +193,154 @@ export function applyColormapToArray(data: Float32Array, colormap: Uint8Array): 
 
     return result;
 }
+
+/**
+ * Generate N colors that contrast maximally with the given colormap LUT.
+ * 
+ * Algorithm:
+ * 1. Sample the LUT, convert each RGB to HSL
+ * 2. Skip near-achromatic colors (low saturation grays/whites/blacks)
+ * 3. Build a histogram of hue usage on the 0-360° color wheel
+ * 4. Find the largest "gap" arcs where no colormap hues exist
+ * 5. Place N well colors evenly within those gaps
+ * 6. Use high saturation (85%) and medium-high lightness (55%) for visibility
+ */
+export function generateContrastColors(lut: Uint8Array, count: number): string[] {
+    // Step 1: Sample the LUT and extract hues
+    const hues: number[] = [];
+    const step = Math.max(1, Math.floor(256 / 32)); // Sample ~32 points
+
+    for (let i = 0; i < 256; i += step) {
+        const r = lut[i * 3] / 255;
+        const g = lut[i * 3 + 1] / 255;
+        const b = lut[i * 3 + 2] / 255;
+
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const delta = max - min;
+        const lightness = (max + min) / 2;
+        const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
+
+        // Skip achromatic colors (grays, whites, blacks) — they occupy no hue
+        if (saturation < 0.15 || lightness < 0.08 || lightness > 0.92) continue;
+
+        let hue = 0;
+        if (delta !== 0) {
+            if (max === r) hue = ((g - b) / delta) % 6;
+            else if (max === g) hue = (b - r) / delta + 2;
+            else hue = (r - g) / delta + 4;
+            hue = ((hue * 60) + 360) % 360;
+        }
+        hues.push(hue);
+    }
+
+    // Step 2: If colormap is fully achromatic (e.g., greys), use a default spread
+    if (hues.length === 0) {
+        return generateEvenlySpacedColors(count, 0);
+    }
+
+    // Step 3: Sort hues and find gaps on the circular color wheel
+    hues.sort((a, b) => a - b);
+
+    interface Gap { start: number; end: number; size: number; center: number }
+    const gaps: Gap[] = [];
+
+    for (let i = 0; i < hues.length - 1; i++) {
+        const gapSize = hues[i + 1] - hues[i];
+        if (gapSize > 10) { // Minimum meaningful gap
+            gaps.push({
+                start: hues[i],
+                end: hues[i + 1],
+                size: gapSize,
+                center: hues[i] + gapSize / 2
+            });
+        }
+    }
+
+    // Wrap-around gap (last hue to first hue through 360°)
+    const wrapGap = (360 - hues[hues.length - 1]) + hues[0];
+    if (wrapGap > 10) {
+        const center = (hues[hues.length - 1] + wrapGap / 2) % 360;
+        gaps.push({
+            start: hues[hues.length - 1],
+            end: hues[0] + 360,
+            size: wrapGap,
+            center
+        });
+    }
+
+    // Sort gaps by size, largest first
+    gaps.sort((a, b) => b.size - a.size);
+
+    // Step 4: Distribute colors across the largest gaps
+    const colors: string[] = [];
+    let remaining = count;
+    let gapIdx = 0;
+
+    while (remaining > 0 && gapIdx < gaps.length) {
+        const gap = gaps[gapIdx];
+        // Allocate colors proportional to gap size, at least 1
+        const allocate = Math.min(remaining, Math.max(1, Math.ceil(count * gap.size / 360)));
+
+        for (let i = 0; i < allocate && remaining > 0; i++) {
+            // Spread evenly within the gap with padding from edges
+            const padding = gap.size * 0.15;
+            const usableSize = gap.size - 2 * padding;
+            const hue = allocate === 1
+                ? gap.center
+                : (gap.start + padding + (usableSize * i / (allocate - 1))) % 360;
+
+            colors.push(hslToHex(hue, 85, 55));
+            remaining--;
+        }
+        gapIdx++;
+    }
+
+    // If we still need more (very unlikely), fill with evenly spaced starting from the largest gap
+    while (colors.length < count) {
+        const offset = gaps.length > 0 ? gaps[0].center : 0;
+        const hue = (offset + (colors.length * 137.508)) % 360; // Golden angle
+        colors.push(hslToHex(hue, 85, 55));
+    }
+
+    return colors;
+}
+
+/**
+ * Generate N evenly-spaced colors starting from a given hue offset.
+ */
+function generateEvenlySpacedColors(count: number, startHue: number): string[] {
+    const colors: string[] = [];
+    for (let i = 0; i < count; i++) {
+        const hue = (startHue + (i * 360 / count)) % 360;
+        colors.push(hslToHex(hue, 85, 55));
+    }
+    return colors;
+}
+
+/**
+ * Convert HSL (h: 0-360, s: 0-100, l: 0-100) to hex color string.
+ */
+function hslToHex(h: number, s: number, l: number): string {
+    s /= 100;
+    l /= 100;
+
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    const m = l - c / 2;
+
+    let r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; b = 0; }
+    else if (h < 120) { r = x; g = c; b = 0; }
+    else if (h < 180) { r = 0; g = c; b = x; }
+    else if (h < 240) { r = 0; g = x; b = c; }
+    else if (h < 300) { r = x; g = 0; b = c; }
+    else { r = c; g = 0; b = x; }
+
+    const toHex = (v: number) => {
+        const hex = Math.round((v + m) * 255).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    };
+
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}

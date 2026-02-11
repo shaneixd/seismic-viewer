@@ -55,6 +55,23 @@
         </select>
         <span id="resolution-status" class="status-text"></span>
       </div>
+      <div class="control-group wells-section">
+        <label>Wells</label>
+        <div class="well-toggles">
+          <label class="toggle-label">
+            <input type="checkbox" id="wells-toggle" checked />
+            <span>Show Wells</span>
+          </label>
+          <label class="toggle-label">
+            <input type="checkbox" id="formations-toggle" checked />
+            <span>Show Formations</span>
+          </label>
+        </div>
+        <div id="well-list" class="well-list">
+          <!-- Populated dynamically -->
+        </div>
+        <div id="well-info" class="well-info hidden"></div>
+      </div>
       <div class="info-panel">
         <p><strong>Survey Info</strong></p>
         <p id="survey-info">Loading data...</p>

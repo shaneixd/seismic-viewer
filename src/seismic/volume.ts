@@ -20,7 +20,7 @@ export interface SeismicVolumeOptions {
 export class SeismicVolume {
     private scene: THREE.Scene;
     private data: Float32Array;
-    private dimensions: SeismicDimensions;
+    public readonly dimensions: SeismicDimensions;
     private colormap: Uint8Array;
 
     // Slice meshes
@@ -32,7 +32,7 @@ export class SeismicVolume {
     private boundingBox: THREE.LineSegments | null = null;
 
     // Scale factor to normalize to unit cube
-    private scale: THREE.Vector3;
+    public readonly scale: THREE.Vector3;
 
     constructor(scene: THREE.Scene, options: SeismicVolumeOptions) {
         this.scene = scene;

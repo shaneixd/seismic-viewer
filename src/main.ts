@@ -2,7 +2,10 @@ import './style.css';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SeismicVolume } from './seismic/volume';
-import { createColormap, AVAILABLE_COLORMAPS, type ColormapType } from './seismic/colormap';
+import { createColormap, AVAILABLE_COLORMAPS, generateContrastColors, type ColormapType } from './seismic/colormap';
+import { WellRenderer } from './seismic/wellRenderer';
+import { loadWellData } from './seismic/wellData';
+import type { WellData } from './seismic/wellData';
 
 // Scene setup
 const canvas = document.getElementById('seismic-canvas') as HTMLCanvasElement;
@@ -55,6 +58,9 @@ scene.add(gridHelper);
 // Seismic volume
 let seismicVolume: SeismicVolume | null = null;
 
+// Well renderer
+let wellRenderer: WellRenderer | null = null;
+
 // UI Elements
 const loadingOverlay = document.getElementById('loading-overlay')!;
 const loadingText = document.getElementById('loading-text')!;
@@ -86,14 +92,23 @@ interface DatasetConfig {
   url: string;
   description: string;
   scale?: { x: number, y: number, z: number };
+  wellDataUrl?: string;
+  // Survey grid parameters for well positioning
+  ilRange?: [number, number];
+  xlRange?: [number, number];
+  timeRangeMs?: [number, number];
 }
 
 const DATASETS: Record<string, DatasetConfig> = {
   f3: {
     name: 'F3 Netherlands',
     url: '/data/f3_highres.bin',
-    description: 'F3 Netherlands: High Resolution (401x701x255)'
-    // Auto-scale is fine for F3, or we can enforce it
+    description: 'F3 Netherlands: High Resolution (401x701x255)',
+    wellDataUrl: '/data/f3_wells.json',
+    // Zenodo Facies Benchmark subset ranges
+    ilRange: [100, 500],
+    xlRange: [300, 1000],
+    timeRangeMs: [0, 1848],
   },
   parihaka: {
     name: 'Parihaka (New Zealand)',
@@ -220,6 +235,14 @@ async function loadSeismicData(datasetKey: string = 'f3') {
     // Initial slice positions
     updateSlices();
 
+    // Load wells if available for this dataset
+    if (config.wellDataUrl && seismicVolume) {
+      loadingText.textContent = 'Loading well data...';
+      await loadAndRenderWells(config, seismicVolume);
+    } else {
+      clearWellUI();
+    }
+
     // Hide loading overlay
     loadingOverlay.classList.add('hidden');
 
@@ -331,9 +354,243 @@ function updateSlices() {
 
 function updateColormap() {
   if (!seismicVolume) return;
-  seismicVolume.setColormap(createColormap(colormapSelect.value as ColormapType));
+  const lut = createColormap(colormapSelect.value as ColormapType);
+  seismicVolume.setColormap(lut);
   updateSlices();
+
+  // Update well colors to contrast with the new colormap
+  applyContrastColorsToWells(lut);
 }
+
+/**
+ * Generate contrast colors from the active LUT and apply to all wells + formations.
+ */
+function applyContrastColorsToWells(lut: Uint8Array): void {
+  if (!wellRenderer || !wellRenderer.hasWells()) return;
+
+  // Contrast colors for well sticks
+  const wellNames = wellRenderer.getWellNames();
+  const colors = generateContrastColors(lut, wellNames.length);
+  wellRenderer.updateWellColors(colors);
+
+  // Contrast colors for formation tops — generate more colors for the unique formations
+  const formationCodes = wellRenderer.getUniqueFormationCodes();
+  if (formationCodes.length > 0) {
+    // Generate enough contrast colors for all unique formations
+    // We request (wells + formations) total so the algorithm spreads across the full gap space,
+    // then take only the formation slice — this avoids formations duplicating well colors.
+    const allColors = generateContrastColors(lut, wellNames.length + formationCodes.length);
+    const fmColors = allColors.slice(wellNames.length);
+    const fmColorMap = new Map<string, string>();
+    for (let i = 0; i < formationCodes.length; i++) {
+      fmColorMap.set(formationCodes[i], fmColors[i]);
+    }
+    wellRenderer.updateFormationColors(fmColorMap);
+  }
+
+  // Update UI dots to match
+  const dots = wellListContainer.querySelectorAll('.well-dot');
+  dots.forEach((dot, i) => {
+    if (i < colors.length) {
+      (dot as HTMLElement).style.backgroundColor = colors[i];
+      (dot as HTMLElement).style.color = colors[i];
+    }
+  });
+}
+
+// Well loading and UI
+const wellsToggle = document.getElementById('wells-toggle') as HTMLInputElement;
+const formationsToggle = document.getElementById('formations-toggle') as HTMLInputElement;
+const wellListContainer = document.getElementById('well-list')!;
+const wellInfoPanel = document.getElementById('well-info')!;
+
+async function loadAndRenderWells(config: DatasetConfig, volume: SeismicVolume): Promise<void> {
+  if (!config.wellDataUrl) return;
+
+  const wellData = await loadWellData(config.wellDataUrl);
+  if (!wellData || wellData.wells.length === 0) {
+    console.log('No well data available');
+    clearWellUI();
+    return;
+  }
+
+  // Dispose previous well renderer
+  if (wellRenderer) {
+    wellRenderer.dispose();
+  }
+
+  // Create well renderer with volume parameters
+  wellRenderer = new WellRenderer(scene, {
+    scale: volume.scale,
+    dimensions: volume.dimensions,
+    volumeIlRange: config.ilRange || [0, volume.dimensions.nx],
+    volumeXlRange: config.xlRange || [0, volume.dimensions.ny],
+    volumeTimeRange: config.timeRangeMs || [0, 1848],
+  });
+
+  // Generate contrast colors based on current colormap
+  const lut = createColormap(colormapSelect.value as ColormapType);
+  const contrastColors = generateContrastColors(lut, wellData.wells.length);
+  for (let i = 0; i < wellData.wells.length; i++) {
+    wellData.wells[i].color = contrastColors[i];
+  }
+
+  wellRenderer.loadWells(wellData);
+
+  // Update UI
+  populateWellList(wellData.wells);
+
+  console.log(`Rendered ${wellData.wells.length} wells with contrast colors:`, contrastColors);
+}
+
+function populateWellList(wells: WellData[]): void {
+  wellListContainer.innerHTML = '';
+
+  for (const well of wells) {
+    const item = document.createElement('div');
+    item.className = 'well-item';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = true;
+    checkbox.style.display = 'none';
+
+    const dot = document.createElement('div');
+    dot.className = 'well-dot';
+    dot.style.backgroundColor = well.color;
+    dot.style.color = well.color;
+
+    const name = document.createElement('span');
+    name.className = 'well-item-name';
+    name.textContent = well.name;
+
+    const info = document.createElement('span');
+    info.className = 'well-item-info';
+    info.textContent = `${well.formations.length} fms`;
+
+    item.appendChild(checkbox);
+    item.appendChild(dot);
+    item.appendChild(name);
+    item.appendChild(info);
+
+    // Click to toggle + show info
+    item.addEventListener('click', () => {
+      checkbox.checked = !checkbox.checked;
+      if (wellRenderer) {
+        wellRenderer.setWellVisible(well.name, checkbox.checked);
+      }
+      dot.style.opacity = checkbox.checked ? '1' : '0.3';
+      name.style.opacity = checkbox.checked ? '1' : '0.5';
+
+      // Show well info
+      showWellInfo(well);
+    });
+
+    wellListContainer.appendChild(item);
+  }
+}
+
+function showWellInfo(well: WellData): void {
+  const topFormations = well.formations.slice(0, 5).map(f => f.name).join(', ');
+  wellInfoPanel.innerHTML = `
+    <strong style="color: ${well.color}">${well.name}</strong><br>
+    IL: ${well.surface_il.toFixed(0)} / XL: ${well.surface_xl.toFixed(0)}<br>
+    TD: ${well.td_md.toFixed(0)}m MD<br>
+    Formations: ${well.formations.length}<br>
+    <small>${topFormations}${well.formations.length > 5 ? '...' : ''}</small>
+  `;
+  wellInfoPanel.classList.remove('hidden');
+}
+
+function clearWellUI(): void {
+  wellListContainer.innerHTML = '<span style="font-size:11px;color:var(--text-secondary)">No wells available</span>';
+  wellInfoPanel.classList.add('hidden');
+  if (wellRenderer) {
+    wellRenderer.dispose();
+    wellRenderer = null;
+  }
+}
+
+// Well event listeners
+wellsToggle.addEventListener('change', () => {
+  if (wellRenderer) {
+    wellRenderer.setAllVisible(wellsToggle.checked);
+  }
+});
+
+formationsToggle.addEventListener('change', () => {
+  if (wellRenderer) {
+    wellRenderer.setFormationsVisible(formationsToggle.checked);
+  }
+});
+
+// Formation hover tooltip
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+// Create tooltip element
+const tooltip = document.createElement('div');
+tooltip.id = 'formation-tooltip';
+tooltip.className = 'formation-tooltip hidden';
+document.getElementById('app')!.appendChild(tooltip);
+
+let hoveredFormation: THREE.Mesh | null = null;
+
+canvas.addEventListener('mousemove', (event: MouseEvent) => {
+  // Convert to normalized device coords
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  if (!wellRenderer || !wellRenderer.hasWells()) {
+    tooltip.classList.add('hidden');
+    return;
+  }
+
+  raycaster.setFromCamera(mouse, camera);
+  const formationMeshes = wellRenderer.getFormationMeshes();
+  const intersects = raycaster.intersectObjects(formationMeshes, false);
+
+  if (intersects.length > 0) {
+    const hit = intersects[0].object as THREE.Mesh;
+    const data = hit.userData;
+
+    if (data.isFormationMarker) {
+      // Update tooltip content
+      tooltip.innerHTML = `
+        <div class="fm-tooltip-header" style="border-left: 3px solid ${data.wellColor}">
+          <span class="fm-tooltip-well">${data.wellName}</span>
+        </div>
+        <div class="fm-tooltip-body">
+          <div class="fm-tooltip-name" style="color: ${data.formationColor}">● ${data.formationName}</div>
+          <div class="fm-tooltip-depth">${data.topTvdss.toFixed(0)}m TVDSS · ${data.topMd.toFixed(0)}m MD</div>
+          <div class="fm-tooltip-code">${data.formationCode}</div>
+        </div>
+      `;
+      tooltip.style.left = `${event.clientX + 16}px`;
+      tooltip.style.top = `${event.clientY - 10}px`;
+      tooltip.classList.remove('hidden');
+
+      // Highlight the hovered ring
+      if (hoveredFormation && hoveredFormation !== hit) {
+        // Restore previous
+        (hoveredFormation.material as THREE.MeshBasicMaterial).opacity = 0.8;
+      }
+      (hit.material as THREE.MeshBasicMaterial).opacity = 1.0;
+      hoveredFormation = hit;
+
+      canvas.style.cursor = 'pointer';
+      return;
+    }
+  }
+
+  // No hit — hide tooltip
+  if (hoveredFormation) {
+    (hoveredFormation.material as THREE.MeshBasicMaterial).opacity = 0.8;
+    hoveredFormation = null;
+  }
+  tooltip.classList.add('hidden');
+  canvas.style.cursor = '';
+});
 
 // Event listeners
 inlineSlider.addEventListener('input', updateSlices);
