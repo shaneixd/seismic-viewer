@@ -99,6 +99,7 @@ const timeValue = document.getElementById('time-value')!;
 
 // Debounce timer for slider updates
 let updateTimer: number | null = null;
+let colormapUpdateTimer: number | null = null;
 
 // Auto mode state
 let isAutoMode = true;
@@ -344,10 +345,20 @@ async function finalSliderUpdate() {
     }, 150); // Small delay to catch rapid slider adjustments
 }
 
-async function updateColormap() {
+function updateColormap() {
     if (!progressiveVolume) return;
-    progressiveVolume.setColormap(createColormap(colormapSelect.value as ColormapType));
-    await updateSlices();
+
+    if (colormapUpdateTimer !== null) {
+        clearTimeout(colormapUpdateTimer);
+    }
+
+    // Debounce to prevent flooding worker with requests during rapid scrolling
+    colormapUpdateTimer = window.setTimeout(async () => {
+        if (!progressiveVolume) return;
+        progressiveVolume.setColormap(createColormap(colormapSelect.value as ColormapType));
+        await updateSlices();
+        colormapUpdateTimer = null;
+    }, 200);
 }
 
 async function handleResolutionChange() {

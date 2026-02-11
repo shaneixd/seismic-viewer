@@ -289,10 +289,25 @@ export class WorkerSliceManager {
     }
 
     /**
+     * Cancel all pending requests
+     */
+    cancelPendingRequests(): void {
+        for (const [key, request] of this.pendingRequests.entries()) {
+            request.reject(new Error('Request cancelled'));
+            this.pendingRequests.delete(key);
+        }
+        this.pendingRequests.clear();
+    }
+
+    /**
      * Update colormap for future extractions
      */
     setColormap(colormap: Uint8Array): void {
         this.colormap = colormap;
+
+        // Cancel any pending extraction requests as they used the old colormap
+        this.cancelPendingRequests();
+
         // Clear cache since colors will change
         this.prefetchCache.clear();
         this.prefetchQueue = [];
@@ -313,12 +328,12 @@ export class WorkerSliceManager {
      * Dispose of the worker
      */
     dispose(): void {
+        this.cancelPendingRequests();
         if (this.worker) {
             this.worker.terminate();
             this.worker = null;
         }
         this.prefetchCache.clear();
         this.prefetchQueue = [];
-        this.pendingRequests.clear();
     }
 }

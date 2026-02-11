@@ -317,21 +317,29 @@ export class ProgressiveSeismicVolume {
         if (!this.workerManager) return;
 
         // Fetch slices via worker in parallel
-        const [inlineResult, crosslineResult, timeResult] = await Promise.all([
-            this.workerManager.getSlice('inline', levelInline, this.currentLevel),
-            this.workerManager.getSlice('crossline', levelCrossline, this.currentLevel),
-            this.workerManager.getSlice('time', levelTime, this.currentLevel)
-        ]);
+        try {
+            const [inlineResult, crosslineResult, timeResult] = await Promise.all([
+                this.workerManager.getSlice('inline', levelInline, this.currentLevel),
+                this.workerManager.getSlice('crossline', levelCrossline, this.currentLevel),
+                this.workerManager.getSlice('time', levelTime, this.currentLevel)
+            ]);
 
-        // Create textures from worker results (already has colormap applied)
-        this.updateInlineMeshFromRGBA(inlineResult, inlinePos, opacity);
-        this.updateCrosslineMeshFromRGBA(crosslineResult, crosslinePos, opacity);
-        this.updateTimeMeshFromRGBA(timeResult, timePos, opacity);
+            // Create textures from worker results (already has colormap applied)
+            this.updateInlineMeshFromRGBA(inlineResult, inlinePos, opacity);
+            this.updateCrosslineMeshFromRGBA(crosslineResult, crosslinePos, opacity);
+            this.updateTimeMeshFromRGBA(timeResult, timePos, opacity);
 
-        // Schedule prefetching for adjacent slices
-        this.workerManager.prefetchAdjacent('inline', levelInline, this.currentLevel, this.dimensions.nx);
-        this.workerManager.prefetchAdjacent('crossline', levelCrossline, this.currentLevel, this.dimensions.ny);
-        this.workerManager.prefetchAdjacent('time', levelTime, this.currentLevel, this.dimensions.nz);
+            // Schedule prefetching for adjacent slices
+            this.workerManager.prefetchAdjacent('inline', levelInline, this.currentLevel, this.dimensions.nx);
+            this.workerManager.prefetchAdjacent('crossline', levelCrossline, this.currentLevel, this.dimensions.ny);
+            this.workerManager.prefetchAdjacent('time', levelTime, this.currentLevel, this.dimensions.nz);
+        } catch (err) {
+            // Ignore cancelled requests
+            if (err instanceof Error && err.message === 'Request cancelled') {
+                return;
+            }
+            console.error('Error updating slices:', err);
+        }
     }
 
     private updateInlineMesh(
