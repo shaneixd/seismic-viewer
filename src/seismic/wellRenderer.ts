@@ -39,6 +39,7 @@ export class WellRenderer {
 
     // Visibility state
     private showFormations: boolean = true;
+    private highlightedWellName: string | null = null;
 
     constructor(scene: THREE.Scene, options: WellRenderOptions) {
         this.scene = scene;
@@ -133,7 +134,10 @@ export class WellRenderer {
     }
 
     /**
-     * Create the well stick geometry (a thin cylinder from surface to TD).
+     * Create the well stick geometry.
+     * Creates two meshes:
+     * 1. A thin visible stick for aesthetics.
+     * 2. A thicker transparent stick for easier clicking/hovering.
      */
     private createWellStick(well: WellData, group: THREE.Group, inBounds: boolean): void {
         const color = new THREE.Color(well.color);
@@ -169,24 +173,38 @@ export class WellRenderer {
             }
 
             if (points.length >= 2) {
-                // Create tube geometry along the path
                 const curve = new THREE.CatmullRomCurve3(points, false, 'centripetal', 0.1);
-                const tubeRadius = 0.003; // Thin tube
-                const tubeGeom = new THREE.TubeGeometry(curve, Math.max(points.length * 2, 8), tubeRadius, 6, false);
 
-                const tubeMat = new THREE.MeshPhongMaterial({
+                // 1. Visual Stick (Thin)
+                const visualRadius = 0.001;
+                const visualGeom = new THREE.TubeGeometry(curve, Math.max(points.length * 2, 8), visualRadius, 6, false);
+                const visualMat = new THREE.MeshPhongMaterial({
                     color: color,
                     emissive: color.clone().multiplyScalar(0.3),
                     shininess: 30,
                     transparent: !inBounds,
                     opacity: inBounds ? 1.0 : 0.4,
                 });
+                const visualMesh = new THREE.Mesh(visualGeom, visualMat);
+                visualMesh.name = `stick-visual-${well.name}`;
+                visualMesh.userData.wellName = well.name;
+                group.add(visualMesh);
+                this.wellSticks.set(well.name, visualMesh); // Keep interaction ref for compatibility
 
-                const tubeMesh = new THREE.Mesh(tubeGeom, tubeMat);
-                tubeMesh.name = `stick-${well.name}`;
-                tubeMesh.userData.wellName = well.name;
-                group.add(tubeMesh);
-                this.wellSticks.set(well.name, tubeMesh);
+                // 2. Hit Area Stick (Thick & Transparent)
+                const hitRadius = 0.012; // Generous hit area
+                const hitGeom = new THREE.TubeGeometry(curve, Math.max(points.length, 4), hitRadius, 5, false);
+                const hitMat = new THREE.MeshBasicMaterial({
+                    color: color,
+                    transparent: true,
+                    opacity: 0, // Invisible but clickable
+                    depthWrite: false,
+                });
+                const hitMesh = new THREE.Mesh(hitGeom, hitMat);
+                hitMesh.name = `stick-hit-${well.name}`;
+                hitMesh.userData.wellName = well.name;
+                hitMesh.userData.isHitArea = true;
+                group.add(hitMesh);
 
                 // Add a small sphere at the surface location
                 const sphereGeom = new THREE.SphereGeometry(0.008, 8, 8);
@@ -426,6 +444,66 @@ export class WellRenderer {
     }
 
     /**
+     * Highlight formation markers by stratigraphic code.
+     * Used for cross-highlighting between the log panel and 3D view.
+     * Pass null to clear all highlights.
+     */
+    public highlightFormationByCode(code: string | null): void {
+        for (const [, markersGroup] of this.formationMarkers) {
+            markersGroup.traverse((obj) => {
+                if (obj instanceof THREE.Mesh && obj.userData.isFormationMarker) {
+                    const mat = obj.material as THREE.MeshPhongMaterial;
+                    if (code === null) {
+                        // Reset all to default
+                        mat.opacity = 0.8;
+                        mat.emissive.setScalar(0);
+                    } else if (obj.userData.formationCode === code) {
+                        // Highlight matching
+                        mat.opacity = 1.0;
+                        mat.emissive.set(obj.userData.formationColor).multiplyScalar(0.4);
+                    } else {
+                        // Dim non-matching
+                        mat.opacity = 0.3;
+                        mat.emissive.setScalar(0);
+                    }
+                }
+            });
+        }
+    }
+
+    /**
+     * Highlight a well by name.
+     */
+    public highlightWell(name: string | null): void {
+        const current = this.highlightedWellName;
+        if (current === name) return;
+
+        // Restore previous
+        if (current) {
+            const mesh = this.wellSticks.get(current);
+            if (mesh && mesh.material) {
+                const mat = mesh.material as THREE.MeshPhongMaterial;
+                if (mat.isMeshPhongMaterial) {
+                    mat.emissive.copy(mat.color).multiplyScalar(0.3);
+                }
+            }
+        }
+
+        this.highlightedWellName = name;
+
+        // Highlight new
+        if (name) {
+            const mesh = this.wellSticks.get(name);
+            if (mesh && mesh.material) {
+                const mat = mesh.material as THREE.MeshPhongMaterial;
+                if (mat.isMeshPhongMaterial) {
+                    mat.emissive.setHex(0xaaaaaa);
+                }
+            }
+        }
+    }
+
+    /**
      * Get all well stick and sphere meshes for raycasting (click-to-center).
      */
     public getWellStickMeshes(): THREE.Mesh[] {
@@ -459,8 +537,8 @@ export class WellRenderer {
             group.traverse((obj) => {
                 if (obj instanceof THREE.Mesh) {
                     const mat = obj.material as THREE.MeshPhongMaterial;
-                    // Only recolor well sticks/spheres, not formation markers
-                    if (!obj.userData.isFormationMarker && mat.isMeshPhongMaterial) {
+                    // Only recolor visible well sticks/spheres (skip hit areas and formation markers)
+                    if (!obj.userData.isFormationMarker && !obj.userData.isHitArea && mat.isMeshPhongMaterial) {
                         mat.color.copy(threeColor);
                         mat.emissive.copy(threeColor).multiplyScalar(0.3);
                     }
@@ -495,7 +573,7 @@ export class WellRenderer {
                     const code = obj.userData.formationCode as string;
                     const newColor = colorMap.get(code);
                     if (newColor) {
-                        (obj.material as THREE.MeshBasicMaterial).color.set(newColor);
+                        (obj.material as THREE.MeshPhongMaterial).color.set(newColor);
                         obj.userData.formationColor = newColor;
                         // Also update the well's formation data
                     }
@@ -586,6 +664,7 @@ export class WellRenderer {
             }
         });
 
+        this.highlightedWellName = null;
         this.scene.remove(this.masterGroup);
         this.wellGroups.clear();
         this.wellSticks.clear();

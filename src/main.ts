@@ -4,8 +4,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { SeismicVolume } from './seismic/volume';
 import { createColormap, AVAILABLE_COLORMAPS, generateContrastColors, type ColormapType } from './seismic/colormap';
 import { WellRenderer } from './seismic/wellRenderer';
-import { loadWellData } from './seismic/wellData';
+import { loadWellData, loadWellLogData, mergeLogData } from './seismic/wellData';
 import type { WellData } from './seismic/wellData';
+import { WellLogPanel } from './seismic/wellLogPanel';
 import GUI from 'lil-gui';
 
 // Scene setup
@@ -61,6 +62,23 @@ let seismicVolume: SeismicVolume | null = null;
 
 // Well renderer
 let wellRenderer: WellRenderer | null = null;
+let currentWells: WellData[] = [];
+
+// Well log panel
+const wellLogPanel = new WellLogPanel(document.getElementById('app')!, {
+  onFormationHover: (_wellName, code) => {
+    // Cross-highlight: panel hover → 3D marker
+    if (wellRenderer) {
+      wellRenderer.highlightFormationByCode(code);
+    }
+  },
+  onClose: () => {
+    // Reset any 3D highlights when panel closes
+    if (wellRenderer) {
+      wellRenderer.highlightFormationByCode(null);
+    }
+  },
+});
 
 // UI Elements (kept for loading overlay)
 const loadingOverlay = document.getElementById('loading-overlay')!;
@@ -69,6 +87,10 @@ const wellInfoPanel = document.getElementById('well-info')!;
 
 // lil-gui setup
 const gui = new GUI({ title: 'Seismic Viewer', width: 280 });
+gui.domElement.style.position = 'fixed';
+gui.domElement.style.top = '0';
+gui.domElement.style.left = '0';
+gui.domElement.style.right = 'auto';
 
 // Build colormap options as { display: value } object
 const colormapOptions: Record<string, string> = {};
@@ -453,7 +475,15 @@ async function loadAndRenderWells(config: DatasetConfig, volume: SeismicVolume):
     wellData.wells[i].color = contrastColors[i];
   }
 
+  // Load well log data
+  const logUrl = config.wellDataUrl.replace('f3_wells.json', 'f3_well_logs.json');
+  const logDataset = await loadWellLogData(logUrl);
+  if (logDataset) {
+    mergeLogData(wellData.wells, logDataset);
+  }
+
   wellRenderer.loadWells(wellData);
+  currentWells = wellData.wells;
 
   // Update UI
   populateWellList(wellData.wells);
@@ -491,7 +521,7 @@ function populateWellList(wells: WellData[]): void {
     item.appendChild(name);
     item.appendChild(info);
 
-    // Click to toggle visibility + show info
+    // Click to toggle visibility + show info + open log panel
     item.addEventListener('click', () => {
       checkbox.checked = !checkbox.checked;
       if (wellRenderer) {
@@ -502,6 +532,15 @@ function populateWellList(wells: WellData[]): void {
 
       // Show well info
       showWellInfo(well);
+
+      // Open/close well log panel if log data available
+      if (well.logs) {
+        if (wellLogPanel.hasWell(well.name)) {
+          wellLogPanel.removeWell(well.name);
+        } else {
+          wellLogPanel.show(well.name, well.logs, well.formations, well.color);
+        }
+      }
     });
 
     wellListContainer.appendChild(item);
@@ -583,6 +622,11 @@ canvas.addEventListener('mousemove', (event: MouseEvent) => {
       (hit.material as THREE.MeshPhongMaterial).opacity = 1.0;
       hoveredFormation = hit;
 
+      // Cross-highlight: 3D hover → panel
+      if (wellLogPanel.visible) {
+        wellLogPanel.highlightFormation(data.formationCode);
+      }
+
       canvas.style.cursor = 'pointer';
       return;
     }
@@ -594,7 +638,32 @@ canvas.addEventListener('mousemove', (event: MouseEvent) => {
     hoveredFormation = null;
   }
   tooltip.classList.add('hidden');
+
+  // Check well sticks (visual + hit areas)
+  const stickMeshes = wellRenderer.getWellStickMeshes();
+  const wellIntersects = raycaster.intersectObjects(stickMeshes, false);
+  if (wellIntersects.length > 0) {
+    const wellName = wellIntersects[0].object.userData.wellName;
+    if (wellName) {
+      wellRenderer.highlightWell(wellName);
+      canvas.style.cursor = 'pointer';
+
+      // Clear panel highlight
+      if (wellLogPanel.visible) {
+        wellLogPanel.highlightFormation(null);
+      }
+      return;
+    }
+  }
+
+  // No well hit
+  wellRenderer.highlightWell(null);
   canvas.style.cursor = '';
+
+  // Clear panel highlight
+  if (wellLogPanel.visible) {
+    wellLogPanel.highlightFormation(null);
+  }
 });
 
 // Click on well in 3D to recenter camera
@@ -635,10 +704,13 @@ canvas.addEventListener('mouseup', (event: MouseEvent) => {
         animateCameraToWell(bounds.center, cameraPos);
       }
 
-      // Also show well info
+      // Also show well info + open log panel
       const wellData = wellRenderer.getWellByName(wellName);
       if (wellData) {
         showWellInfo(wellData);
+        if (wellData.logs) {
+          wellLogPanel.show(wellData.name, wellData.logs, wellData.formations, wellData.color);
+        }
       }
     }
   }
