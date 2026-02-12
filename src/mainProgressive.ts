@@ -262,7 +262,7 @@ async function updateSlices() {
     const timePos = parseInt(timeSlider.value);
     const opacity = parseInt(opacitySlider.value) / 100;
 
-    await progressiveVolume.updateSlices(inlinePos, crosslinePos, timePos, opacity);
+    await progressiveVolume.updateSlices(inlinePos, crosslinePos, timePos, opacity, true, true, true);
     updateSliderDisplays();
 }
 
@@ -317,7 +317,7 @@ async function interactiveSliderUpdate() {
         const timePos = parseInt(timeSlider.value);
         const opacity = parseInt(opacitySlider.value) / 100;
 
-        await progressiveVolume.updateSlices(inlinePos, crosslinePos, timePos, opacity);
+        await progressiveVolume.updateSlices(inlinePos, crosslinePos, timePos, opacity, true, true, true);
         updateTimer = null;
     }, perfSettings.debounceMs); // Fast updates during interaction
 }

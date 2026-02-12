@@ -190,66 +190,100 @@ export class SeismicVolume {
     /**
      * Update all slice positions
      */
-    public updateSlices(inlinePos: number, crosslinePos: number, timePos: number, opacity: number = 0.8): void {
+    public updateSlices(
+        inlinePos: number,
+        crosslinePos: number,
+        timePos: number,
+        opacity: number = 0.8,
+        showInline: boolean = true,
+        showCrossline: boolean = true,
+        showTime: boolean = true
+    ): void {
         const { nx, ny, nz } = this.dimensions;
 
-        // Remove old slices
-        if (this.inlineSlice) {
-            this.scene.remove(this.inlineSlice);
-            this.inlineSlice.geometry.dispose();
-            (this.inlineSlice.material as THREE.Material).dispose();
-        }
-        if (this.crosslineSlice) {
-            this.scene.remove(this.crosslineSlice);
-            this.crosslineSlice.geometry.dispose();
-            (this.crosslineSlice.material as THREE.Material).dispose();
-        }
-        if (this.timeSlice) {
-            this.scene.remove(this.timeSlice);
-            this.timeSlice.geometry.dispose();
-            (this.timeSlice.material as THREE.Material).dispose();
+        // --- Inline Slice ---
+        if (showInline) {
+            // Create if missing
+            if (!this.inlineSlice) {
+                const inlineGeom = new THREE.PlaneGeometry(this.scale.z, this.scale.y);
+                const inlineTex = this.createInlineTexture(inlinePos);
+                const inlineMat = new THREE.MeshBasicMaterial({
+                    map: inlineTex,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: opacity
+                });
+                this.inlineSlice = new THREE.Mesh(inlineGeom, inlineMat);
+                this.inlineSlice.rotation.y = -Math.PI / 2;
+                this.scene.add(this.inlineSlice);
+            } else {
+                // Update existing
+                (this.inlineSlice.material as THREE.MeshBasicMaterial).map?.dispose();
+                (this.inlineSlice.material as THREE.MeshBasicMaterial).map = this.createInlineTexture(inlinePos);
+                (this.inlineSlice.material as THREE.MeshBasicMaterial).opacity = opacity;
+            }
+            // Position
+            this.inlineSlice.position.x = (inlinePos / nx - 0.5) * this.scale.x;
+            this.inlineSlice.visible = true;
+        } else {
+            // Hide if exists
+            if (this.inlineSlice) {
+                this.inlineSlice.visible = false;
+            }
         }
 
-        // Create inline slice (XZ plane at constant Y in world coords)
-        const inlineGeom = new THREE.PlaneGeometry(this.scale.z, this.scale.y);
-        const inlineTex = this.createInlineTexture(inlinePos);
-        const inlineMat = new THREE.MeshBasicMaterial({
-            map: inlineTex,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: opacity
-        });
-        this.inlineSlice = new THREE.Mesh(inlineGeom, inlineMat);
-        this.inlineSlice.rotation.y = -Math.PI / 2;
-        this.inlineSlice.position.x = (inlinePos / nx - 0.5) * this.scale.x;
-        this.scene.add(this.inlineSlice);
+        // --- Crossline Slice ---
+        if (showCrossline) {
+            if (!this.crosslineSlice) {
+                const crosslineGeom = new THREE.PlaneGeometry(this.scale.x, this.scale.y);
+                const crosslineTex = this.createCrosslineTexture(crosslinePos);
+                const crosslineMat = new THREE.MeshBasicMaterial({
+                    map: crosslineTex,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: opacity
+                });
+                this.crosslineSlice = new THREE.Mesh(crosslineGeom, crosslineMat);
+                this.scene.add(this.crosslineSlice);
+            } else {
+                (this.crosslineSlice.material as THREE.MeshBasicMaterial).map?.dispose();
+                (this.crosslineSlice.material as THREE.MeshBasicMaterial).map = this.createCrosslineTexture(crosslinePos);
+                (this.crosslineSlice.material as THREE.MeshBasicMaterial).opacity = opacity;
+            }
+            this.crosslineSlice.position.z = (crosslinePos / ny - 0.5) * this.scale.z;
+            this.crosslineSlice.visible = true;
+        } else {
+            if (this.crosslineSlice) {
+                this.crosslineSlice.visible = false;
+            }
+        }
 
-        // Create crossline slice (YZ plane at constant X in world coords)
-        const crosslineGeom = new THREE.PlaneGeometry(this.scale.x, this.scale.y);
-        const crosslineTex = this.createCrosslineTexture(crosslinePos);
-        const crosslineMat = new THREE.MeshBasicMaterial({
-            map: crosslineTex,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: opacity
-        });
-        this.crosslineSlice = new THREE.Mesh(crosslineGeom, crosslineMat);
-        this.crosslineSlice.position.z = (crosslinePos / ny - 0.5) * this.scale.z;
-        this.scene.add(this.crosslineSlice);
-
-        // Create time slice (XY plane at constant Z in world coords)
-        const timeGeom = new THREE.PlaneGeometry(this.scale.x, this.scale.z);
-        const timeTex = this.createTimeTexture(timePos);
-        const timeMat = new THREE.MeshBasicMaterial({
-            map: timeTex,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: opacity
-        });
-        this.timeSlice = new THREE.Mesh(timeGeom, timeMat);
-        this.timeSlice.rotation.x = -Math.PI / 2;
-        this.timeSlice.position.y = (0.5 - timePos / nz) * this.scale.y;
-        this.scene.add(this.timeSlice);
+        // --- Time Slice ---
+        if (showTime) {
+            if (!this.timeSlice) {
+                const timeGeom = new THREE.PlaneGeometry(this.scale.x, this.scale.z);
+                const timeTex = this.createTimeTexture(timePos);
+                const timeMat = new THREE.MeshBasicMaterial({
+                    map: timeTex,
+                    side: THREE.DoubleSide,
+                    transparent: true,
+                    opacity: opacity
+                });
+                this.timeSlice = new THREE.Mesh(timeGeom, timeMat);
+                this.timeSlice.rotation.x = -Math.PI / 2;
+                this.scene.add(this.timeSlice);
+            } else {
+                (this.timeSlice.material as THREE.MeshBasicMaterial).map?.dispose();
+                (this.timeSlice.material as THREE.MeshBasicMaterial).map = this.createTimeTexture(timePos);
+                (this.timeSlice.material as THREE.MeshBasicMaterial).opacity = opacity;
+            }
+            this.timeSlice.position.y = (0.5 - timePos / nz) * this.scale.y;
+            this.timeSlice.visible = true;
+        } else {
+            if (this.timeSlice) {
+                this.timeSlice.visible = false;
+            }
+        }
     }
 
     /**

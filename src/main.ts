@@ -62,7 +62,6 @@ let seismicVolume: SeismicVolume | null = null;
 
 // Well renderer
 let wellRenderer: WellRenderer | null = null;
-let currentWells: WellData[] = [];
 
 // Well log panel
 const wellLogPanel = new WellLogPanel(document.getElementById('app')!, {
@@ -105,7 +104,11 @@ const params = {
   crossline: 50,
   time: 50,
   opacity: 80,
+  showInline: true,
+  showCrossline: true,
+  showTime: true,
   colormap: 'seismic' as string,
+  showAxes: false,
   showWells: true,
   showFormations: true,
   surveyInfo: 'Loading...',
@@ -123,14 +126,22 @@ gui.add(params, 'dataset', datasetOptions).name('Dataset').onChange((value: stri
 // Slices folder
 const slicesFolder = gui.addFolder('Slices');
 const inlineCtrl = slicesFolder.add(params, 'inline', 0, 100, 1).name('Inline').onChange(updateSlices);
+slicesFolder.add(params, 'showInline').name('Show Inline').onChange(updateSlices);
+
 const crosslineCtrl = slicesFolder.add(params, 'crossline', 0, 100, 1).name('Crossline').onChange(updateSlices);
+slicesFolder.add(params, 'showCrossline').name('Show Crossline').onChange(updateSlices);
+
 const timeCtrl = slicesFolder.add(params, 'time', 0, 100, 1).name('Time').onChange(updateSlices);
+slicesFolder.add(params, 'showTime').name('Show Time').onChange(updateSlices);
 
 // Display folder
 const displayFolder = gui.addFolder('Display');
 displayFolder.add(params, 'opacity', 0, 100, 1).name('Opacity').onChange(updateSlices);
 displayFolder.add(params, 'colormap', colormapOptions).name('Color Scale').onChange(() => {
   updateColormap();
+});
+displayFolder.add(params, 'showAxes').name('Show Axes').onChange((value: boolean) => {
+  axesHelper.visible = value;
 });
 
 // Wells folder
@@ -394,7 +405,15 @@ async function createDemoData(datasetName: string) {
 
 function updateSlices() {
   if (!seismicVolume) return;
-  seismicVolume.updateSlices(params.inline, params.crossline, params.time, params.opacity / 100);
+  seismicVolume.updateSlices(
+    params.inline,
+    params.crossline,
+    params.time,
+    params.opacity / 100,
+    params.showInline,
+    params.showCrossline,
+    params.showTime
+  );
 }
 
 function updateColormap() {
@@ -483,7 +502,6 @@ async function loadAndRenderWells(config: DatasetConfig, volume: SeismicVolume):
   }
 
   wellRenderer.loadWells(wellData);
-  currentWells = wellData.wells;
 
   // Update UI
   populateWellList(wellData.wells);

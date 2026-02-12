@@ -70,7 +70,7 @@ const TRACK_CONFIGS: Record<string, TrackConfig> = {
 };
 
 // Layout constants
-const HEADER_HEIGHT = 40;
+
 const WELL_HEADER_HEIGHT = 32;
 const SCALE_HEADER_HEIGHT = 36;
 const DEPTH_TRACK_WIDTH = 52;

@@ -263,7 +263,10 @@ export class ProgressiveSeismicVolume {
         inlinePos: number,
         crosslinePos: number,
         timePos: number,
-        opacity: number = 0.8
+        opacity: number = 0.8,
+        showInline: boolean = true,
+        showCrossline: boolean = true,
+        showTime: boolean = true
     ): Promise<void> {
         this.inlinePos = inlinePos;
         this.crosslinePos = crosslinePos;
@@ -284,26 +287,44 @@ export class ProgressiveSeismicVolume {
         if (this.useWorker && this.workerManager) {
             await this.updateSlicesWithWorker(
                 clampedInline, clampedCrossline, clampedTime,
-                inlinePos, crosslinePos, timePos, opacity
+                inlinePos, crosslinePos, timePos, opacity,
+                showInline, showCrossline, showTime
             );
             return;
         }
 
         // Fallback: main thread extraction
-        const [inlineSlice, crosslineSlice, timeSlice] = await Promise.all([
-            this.brickManager.getInlineSlice(clampedInline, this.currentLevel),
-            this.brickManager.getCrosslineSlice(clampedCrossline, this.currentLevel),
-            this.brickManager.getTimeSlice(clampedTime, this.currentLevel)
-        ]);
+        const promises = [];
+        if (showInline) promises.push(this.brickManager.getInlineSlice(clampedInline, this.currentLevel));
+        if (showCrossline) promises.push(this.brickManager.getCrosslineSlice(clampedCrossline, this.currentLevel));
+        if (showTime) promises.push(this.brickManager.getTimeSlice(clampedTime, this.currentLevel));
+
+        const results = await Promise.all(promises);
+        let resultIdx = 0;
 
         // Update inline slice
-        this.updateInlineMesh(inlineSlice, inlinePos, opacity);
+        if (showInline) {
+            this.updateInlineMesh(results[resultIdx++], inlinePos, opacity);
+            if (this.inlineMesh) this.inlineMesh.visible = true;
+        } else {
+            if (this.inlineMesh) this.inlineMesh.visible = false;
+        }
 
         // Update crossline slice
-        this.updateCrosslineMesh(crosslineSlice, crosslinePos, opacity);
+        if (showCrossline) {
+            this.updateCrosslineMesh(results[resultIdx++], crosslinePos, opacity);
+            if (this.crosslineMesh) this.crosslineMesh.visible = true;
+        } else {
+            if (this.crosslineMesh) this.crosslineMesh.visible = false;
+        }
 
         // Update time slice
-        this.updateTimeMesh(timeSlice, timePos, opacity);
+        if (showTime) {
+            this.updateTimeMesh(results[resultIdx++], timePos, opacity);
+            if (this.timeMesh) this.timeMesh.visible = true;
+        } else {
+            if (this.timeMesh) this.timeMesh.visible = false;
+        }
     }
 
     /**
@@ -312,27 +333,49 @@ export class ProgressiveSeismicVolume {
     private async updateSlicesWithWorker(
         levelInline: number, levelCrossline: number, levelTime: number,
         inlinePos: number, crosslinePos: number, timePos: number,
-        opacity: number
+        opacity: number,
+        showInline: boolean,
+        showCrossline: boolean,
+        showTime: boolean
     ): Promise<void> {
         if (!this.workerManager) return;
 
-        // Fetch slices via worker in parallel
         try {
-            const [inlineResult, crosslineResult, timeResult] = await Promise.all([
-                this.workerManager.getSlice('inline', levelInline, this.currentLevel),
-                this.workerManager.getSlice('crossline', levelCrossline, this.currentLevel),
-                this.workerManager.getSlice('time', levelTime, this.currentLevel)
-            ]);
+            const promises = [];
+
+            if (showInline) promises.push(this.workerManager.getSlice('inline', levelInline, this.currentLevel));
+            if (showCrossline) promises.push(this.workerManager.getSlice('crossline', levelCrossline, this.currentLevel));
+            if (showTime) promises.push(this.workerManager.getSlice('time', levelTime, this.currentLevel));
+
+            const results = await Promise.all(promises);
+            let resultIdx = 0;
 
             // Create textures from worker results (already has colormap applied)
-            this.updateInlineMeshFromRGBA(inlineResult, inlinePos, opacity);
-            this.updateCrosslineMeshFromRGBA(crosslineResult, crosslinePos, opacity);
-            this.updateTimeMeshFromRGBA(timeResult, timePos, opacity);
+            if (showInline) {
+                this.updateInlineMeshFromRGBA(results[resultIdx++], inlinePos, opacity);
+                if (this.inlineMesh) this.inlineMesh.visible = true;
+            } else {
+                if (this.inlineMesh) this.inlineMesh.visible = false;
+            }
 
-            // Schedule prefetching for adjacent slices
-            this.workerManager.prefetchAdjacent('inline', levelInline, this.currentLevel, this.dimensions.nx);
-            this.workerManager.prefetchAdjacent('crossline', levelCrossline, this.currentLevel, this.dimensions.ny);
-            this.workerManager.prefetchAdjacent('time', levelTime, this.currentLevel, this.dimensions.nz);
+            if (showCrossline) {
+                this.updateCrosslineMeshFromRGBA(results[resultIdx++], crosslinePos, opacity);
+                if (this.crosslineMesh) this.crosslineMesh.visible = true;
+            } else {
+                if (this.crosslineMesh) this.crosslineMesh.visible = false;
+            }
+
+            if (showTime) {
+                this.updateTimeMeshFromRGBA(results[resultIdx++], timePos, opacity);
+                if (this.timeMesh) this.timeMesh.visible = true;
+            } else {
+                if (this.timeMesh) this.timeMesh.visible = false;
+            }
+
+            // Schedule prefetching for adjacent slices (only if visible)
+            if (showInline) this.workerManager.prefetchAdjacent('inline', levelInline, this.currentLevel, this.dimensions.nx);
+            if (showCrossline) this.workerManager.prefetchAdjacent('crossline', levelCrossline, this.currentLevel, this.dimensions.ny);
+            if (showTime) this.workerManager.prefetchAdjacent('time', levelTime, this.currentLevel, this.dimensions.nz);
         } catch (err) {
             // Ignore cancelled requests
             if (err instanceof Error && err.message === 'Request cancelled') {

@@ -279,9 +279,7 @@ export class WellRenderer {
         this.wellLabels.set(well.name, sprite);
     }
 
-    /**
-     * Create formation (well tops) markers along the wellbore.
-     */
+
     private createFormationMarkers(well: WellData, group: THREE.Group): void {
         const markersGroup = new THREE.Group();
         markersGroup.name = `formations-${well.name}`;
