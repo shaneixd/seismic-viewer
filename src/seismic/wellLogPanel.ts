@@ -14,6 +14,8 @@ import type { WellLogData, WellLogCurve, WellFormation } from './wellData';
 export interface WellLogPanelCallbacks {
     onFormationHover?: (wellName: string, formationCode: string | null) => void;
     onClose?: () => void;
+    onVisibilityChange?: (visible: boolean, panelWidth: number) => void;
+    onMoveToTab?: (wells: Array<{ wellName: string; wellColor: string; logData: WellLogData; formations: WellFormation[] }>) => void;
 }
 
 /** Track rendering config */
@@ -126,7 +128,23 @@ export class WellLogPanel {
         this.closeAllBtn.innerHTML = '✕ Close All';
         this.closeAllBtn.addEventListener('click', () => this.hideAll());
 
+        // Expand-to-tab button
+        const expandBtn = document.createElement('button');
+        expandBtn.className = 'well-log-expand';
+        expandBtn.textContent = '⤢ Expand';
+        expandBtn.title = 'Expand to full-width tab view';
+        expandBtn.addEventListener('click', () => {
+            if (this.wells.length === 0) return;
+            const wellData = this.getWellData();
+            this.callbacks.onMoveToTab?.(wellData);
+            // Hide panel mode but keep wells loaded
+            this.container.classList.remove('visible');
+            this.isVisible = false;
+            this.callbacks.onVisibilityChange?.(false, 0);
+        });
+
         this.headerEl.appendChild(this.titleEl);
+        this.headerEl.appendChild(expandBtn);
         this.headerEl.appendChild(this.closeAllBtn);
         this.container.appendChild(this.headerEl);
 
@@ -163,6 +181,9 @@ export class WellLogPanel {
         this.updateTitle();
 
         requestAnimationFrame(() => this.renderAll());
+
+        // Notify viewport to resize
+        this.callbacks.onVisibilityChange?.(true, this.getPanelWidth());
     }
 
     /** Remove a single well from the panel */
@@ -186,6 +207,7 @@ export class WellLogPanel {
             this.updatePanelWidth();
             this.updateTitle();
             this.renderAll();
+            this.callbacks.onVisibilityChange?.(true, this.getPanelWidth());
         }
     }
 
@@ -197,6 +219,7 @@ export class WellLogPanel {
         this.container.classList.remove('visible');
         this.isVisible = false;
         this.callbacks.onClose?.();
+        this.callbacks.onVisibilityChange?.(false, 0);
     }
 
     /** Highlight a formation band across all columns (called from 3D hover) */
@@ -221,6 +244,49 @@ export class WellLogPanel {
 
     dispose(): void {
         this.container.remove();
+    }
+
+    /** Return the panel's root DOM element (for reparenting into tab content area). */
+    getContainer(): HTMLElement {
+        return this.container;
+    }
+
+    /** Snapshot current well data for dock-back restore. */
+    getWellData(): Array<{ wellName: string; wellColor: string; logData: WellLogData; formations: WellFormation[] }> {
+        return this.wells.map(w => ({
+            wellName: w.wellName,
+            wellColor: w.wellColor,
+            logData: w.logData,
+            formations: w.formations,
+        }));
+    }
+
+    /** Switch to tab mode — full-width layout inside the tab content area. */
+    enterTabMode(): void {
+        this.container.classList.add('well-log-tab-mode');
+        // Override width to fill content area
+        this.container.style.width = '';
+        this.container.classList.add('visible');
+        this.isVisible = true;
+        requestAnimationFrame(() => this.renderAll());
+    }
+
+    /** Switch back to panel mode — side panel layout. */
+    exitTabMode(parentEl: HTMLElement): void {
+        this.container.classList.remove('well-log-tab-mode');
+        parentEl.appendChild(this.container);
+        this.updatePanelWidth();
+        this.container.classList.add('visible');
+        this.isVisible = true;
+        this.callbacks.onVisibilityChange?.(true, this.getPanelWidth());
+        requestAnimationFrame(() => this.renderAll());
+    }
+
+    /** Get the current panel pixel width (0 if hidden) */
+    getPanelWidth(): number {
+        if (!this.isVisible) return 0;
+        const totalWidth = this.wells.length * (SINGLE_WELL_WIDTH + WELL_SEPARATOR) + PANEL_PADDING * 2;
+        return Math.max(totalWidth, 120);
     }
 
     // ─── DOM creation ───────────────────────────────────────

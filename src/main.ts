@@ -7,6 +7,10 @@ import { WellRenderer } from './seismic/wellRenderer';
 import { loadWellData, loadWellLogData, mergeLogData } from './seismic/wellData';
 import type { WellData } from './seismic/wellData';
 import { WellLogPanel } from './seismic/wellLogPanel';
+import { ContextMenu, type SliceInfo, type InterpViewMode } from './seismic/contextMenu';
+import { HorizonInterpPanel, type InterpSliceInfo } from './seismic/horizonInterpPanel';
+import { TabBar, type TabSliceInfo } from './seismic/tabBar';
+import { Faux2DMode, type Faux2DSliceInfo } from './seismic/faux2dMode';
 import GUI from 'lil-gui';
 
 // Scene setup
@@ -77,7 +81,140 @@ const wellLogPanel = new WellLogPanel(document.getElementById('app')!, {
       wellRenderer.highlightFormationByCode(null);
     }
   },
+  onVisibilityChange: () => updateViewport(),
+  onMoveToTab: () => {
+    // Transfer the well log panel to a full-width tab
+    const container = wellLogPanel.getContainer();
+    const wellCount = wellLogPanel.activeWells.length;
+    tabBar.addCustomTab(
+      'well-logs',
+      `Well Logs (${wellCount})`,
+      container,
+      () => {
+        // Dock back to side panel
+        wellLogPanel.exitTabMode(document.getElementById('app')!);
+        updateViewport();
+      }
+    );
+    wellLogPanel.enterTabMode();
+  },
 });
+
+// --- Interpretation Components ---
+
+// Context menu for right-clicking slice planes
+const contextMenu = new ContextMenu(document.getElementById('app')!, {
+  onSelect: (mode: InterpViewMode, slice: SliceInfo) => {
+    openInterpretation(mode, slice);
+  }
+});
+
+// Side panel (View 1)
+const interpPanel = new HorizonInterpPanel(document.getElementById('app')!, {
+  onClose: () => updateViewport(),
+  onShow: () => updateViewport(),
+  onMoveToTab: (slice) => {
+    tabBar.addSlice(slice);
+  },
+});
+
+// Tab bar (View 2)
+const tabBar = new TabBar(document.getElementById('app')!, canvas, {
+  onActivate3D: () => { /* 3D canvas shown by TabBar */ },
+  onDeactivate3D: () => { /* 3D canvas hidden by TabBar */ },
+  onMoveToPanel: (slice) => {
+    // Transfer the slice from the tab to the side panel
+    interpPanel.show(slice);
+  },
+});
+
+// Faux-2D mode (View 3) — save & restore scene state on enter/exit
+let savedFaux2DState: {
+  opacity: number;
+  showAxes: boolean;
+  showInline: boolean;
+  showCrossline: boolean;
+  showTime: boolean;
+} | null = null;
+
+const faux2dMode = new Faux2DMode(document.getElementById('app')!, camera, controls, {
+  onEnter: (info) => {
+    // Save current state
+    savedFaux2DState = {
+      opacity: params.opacity,
+      showAxes: params.showAxes,
+      showInline: params.showInline,
+      showCrossline: params.showCrossline,
+      showTime: params.showTime,
+    };
+
+    // Set opacity to 100%
+    params.opacity = 100;
+
+    // Hide axes
+    params.showAxes = false;
+    axesHelper.visible = false;
+
+    // Show only the target slice, hide the others
+    params.showInline = info.sliceType === 'inline';
+    params.showCrossline = info.sliceType === 'crossline';
+    params.showTime = false;
+
+    updateSlices();
+
+    // Refresh GUI controllers to reflect changed params
+    gui.controllersRecursive().forEach(c => c.updateDisplay());
+  },
+  onExit: () => {
+    // Restore saved state
+    if (savedFaux2DState) {
+      params.opacity = savedFaux2DState.opacity;
+      params.showAxes = savedFaux2DState.showAxes;
+      axesHelper.visible = savedFaux2DState.showAxes;
+      params.showInline = savedFaux2DState.showInline;
+      params.showCrossline = savedFaux2DState.showCrossline;
+      params.showTime = savedFaux2DState.showTime;
+      savedFaux2DState = null;
+
+      updateSlices();
+      gui.controllersRecursive().forEach(c => c.updateDisplay());
+    }
+  },
+});
+
+// Current dataset config reference for survey ranges
+let currentConfig: DatasetConfig | null = null;
+
+// ── Viewport management ──
+// When side panels (well logs or interp panel) open/close, we resize the
+// Three.js renderer to fill only the remaining space. This keeps the 3D
+// scene centered and actually *improves* performance (fewer pixels drawn).
+
+const INTERP_PANEL_WIDTH_FRACTION = 0.60; // interp panel takes 60% of screen
+
+function getRightPanelWidth(): number {
+  // Interp panel takes priority if visible
+  if (interpPanel.visible) {
+    return Math.round(window.innerWidth * INTERP_PANEL_WIDTH_FRACTION);
+  }
+  // Well log panel
+  return wellLogPanel.getPanelWidth();
+}
+
+function updateViewport(): void {
+  const rightPanelW = getRightPanelWidth();
+  const availableW = window.innerWidth - rightPanelW;
+  const availableH = window.innerHeight;
+
+  // Resize renderer to available area
+  renderer.setSize(availableW, availableH);
+  camera.aspect = availableW / availableH;
+  camera.updateProjectionMatrix();
+
+  // Shift canvas to fill the left portion
+  canvas.style.width = `${availableW}px`;
+  canvas.style.height = `${availableH}px`;
+}
 
 // UI Elements (kept for loading overlay)
 const loadingOverlay = document.getElementById('loading-overlay')!;
@@ -111,6 +248,8 @@ const params = {
   showAxes: false,
   showWells: true,
   showFormations: true,
+  clipMin: -1,
+  clipMax: 1,
   surveyInfo: 'Loading...',
 };
 
@@ -142,6 +281,18 @@ displayFolder.add(params, 'colormap', colormapOptions).name('Color Scale').onCha
 });
 displayFolder.add(params, 'showAxes').name('Show Axes').onChange((value: boolean) => {
   axesHelper.visible = value;
+});
+displayFolder.add(params, 'clipMin', -1, 1, 0.01).name('Clip Min').onChange(() => {
+  if (seismicVolume) {
+    seismicVolume.setClipRange(params.clipMin, params.clipMax);
+    updateSlices();
+  }
+});
+displayFolder.add(params, 'clipMax', -1, 1, 0.01).name('Clip Max').onChange(() => {
+  if (seismicVolume) {
+    seismicVolume.setClipRange(params.clipMin, params.clipMax);
+    updateSlices();
+  }
 });
 
 // Wells folder
@@ -307,6 +458,9 @@ async function loadSeismicData(datasetKey: string = 'f3') {
 
     // Initial slice positions
     updateSlices();
+
+    // Store config for interpretation views
+    currentConfig = config;
 
     // Load wells if available for this dataset
     if (config.wellDataUrl && seismicVolume) {
@@ -599,9 +753,10 @@ document.getElementById('app')!.appendChild(tooltip);
 let hoveredFormation: THREE.Mesh | null = null;
 
 canvas.addEventListener('mousemove', (event: MouseEvent) => {
-  // Convert to normalized device coords
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  // Convert to normalized device coords (relative to canvas, not window)
+  const rect = canvas.getBoundingClientRect();
+  mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
   if (!wellRenderer || !wellRenderer.hasWells()) {
     tooltip.classList.add('hidden');
@@ -691,6 +846,100 @@ canvas.addEventListener('mousedown', (event: MouseEvent) => {
   mouseDownPos = { x: event.clientX, y: event.clientY };
 });
 
+// ── Right-click context menu for slice interpretation ──
+canvas.addEventListener('contextmenu', (event: MouseEvent) => {
+  event.preventDefault();
+
+  if (!seismicVolume || faux2dMode.active) return;
+
+  const clickMouse = new THREE.Vector2(
+    (event.clientX / window.innerWidth) * 2 - 1,
+    -(event.clientY / window.innerHeight) * 2 + 1
+  );
+
+  raycaster.setFromCamera(clickMouse, camera);
+  const sliceMeshes = seismicVolume.getSliceMeshes();
+  const intersects = raycaster.intersectObjects(sliceMeshes, false);
+
+  if (intersects.length > 0) {
+    const hit = intersects[0].object;
+    const sliceType = hit.userData.sliceType as 'inline' | 'crossline';
+    const sliceIndex = hit.userData.sliceIndex as number;
+
+    // Build a human-readable label using survey ranges
+    let label: string;
+    if (sliceType === 'inline') {
+      const ilRange = currentConfig?.ilRange || [0, seismicVolume.dimensions.nx];
+      const surveyIL = Math.round(ilRange[0] + (sliceIndex / (seismicVolume.dimensions.nx - 1)) * (ilRange[1] - ilRange[0]));
+      label = `Inline ${surveyIL}`;
+    } else {
+      const xlRange = currentConfig?.xlRange || [0, seismicVolume.dimensions.ny];
+      const surveyXL = Math.round(xlRange[0] + (sliceIndex / (seismicVolume.dimensions.ny - 1)) * (xlRange[1] - xlRange[0]));
+      label = `Crossline ${surveyXL}`;
+    }
+
+    contextMenu.show(event.clientX, event.clientY, { sliceType, sliceIndex, label });
+  }
+});
+
+/** Open the requested interpretation view with slice data. */
+function openInterpretation(mode: InterpViewMode, slice: SliceInfo): void {
+  if (!seismicVolume) return;
+
+  const { data, width, height } = seismicVolume.getSliceData(slice.sliceType, slice.sliceIndex);
+  const colormap = createColormap(params.colormap as ColormapType);
+  const timeRangeMs: [number, number] = currentConfig?.timeRangeMs || [0, height];
+  const ilRange: [number, number] = currentConfig?.ilRange || [0, seismicVolume.dimensions.nx];
+  const xlRange: [number, number] = currentConfig?.xlRange || [0, seismicVolume.dimensions.ny];
+
+  if (mode === 'panel') {
+    const info: InterpSliceInfo = {
+      sliceType: slice.sliceType,
+      sliceIndex: slice.sliceIndex,
+      label: slice.label,
+      data, width, height, colormap,
+      timeRangeMs, ilRange, xlRange,
+    };
+    interpPanel.show(info);
+  } else if (mode === 'tab') {
+    const info: TabSliceInfo = {
+      sliceType: slice.sliceType,
+      sliceIndex: slice.sliceIndex,
+      label: slice.label,
+      data, width, height, colormap,
+      timeRangeMs, ilRange, xlRange,
+    };
+    tabBar.addSlice(info);
+  } else if (mode === 'faux2d') {
+    // Compute slice center position and normal in scene coords
+    const dims = seismicVolume.dimensions;
+    const scale = seismicVolume.scale;
+    let slicePosition: THREE.Vector3;
+    let sliceNormal: THREE.Vector3;
+
+    if (slice.sliceType === 'inline') {
+      const x = (slice.sliceIndex / dims.nx - 0.5) * scale.x;
+      slicePosition = new THREE.Vector3(x, 0, 0);
+      sliceNormal = new THREE.Vector3(1, 0, 0);
+    } else {
+      const z = (slice.sliceIndex / dims.ny - 0.5) * scale.z;
+      slicePosition = new THREE.Vector3(0, 0, z);
+      sliceNormal = new THREE.Vector3(0, 0, 1);
+    }
+
+    const info: Faux2DSliceInfo = {
+      sliceType: slice.sliceType,
+      sliceIndex: slice.sliceIndex,
+      label: slice.label,
+      slicePosition,
+      sliceNormal,
+      volumeScale: scale,
+      timeRangeMs, ilRange, xlRange,
+    };
+    faux2dMode.enter(info);
+  }
+}
+
 canvas.addEventListener('mouseup', (event: MouseEvent) => {
   // Only trigger on actual clicks, not drags (threshold: 5px)
   const dx = event.clientX - mouseDownPos.x;
@@ -699,9 +948,10 @@ canvas.addEventListener('mouseup', (event: MouseEvent) => {
 
   if (!wellRenderer || !wellRenderer.hasWells()) return;
 
+  const canvasRect = canvas.getBoundingClientRect();
   const clickMouse = new THREE.Vector2(
-    (event.clientX / window.innerWidth) * 2 - 1,
-    -(event.clientY / window.innerHeight) * 2 + 1
+    ((event.clientX - canvasRect.left) / canvasRect.width) * 2 - 1,
+    -((event.clientY - canvasRect.top) / canvasRect.height) * 2 + 1
   );
 
   raycaster.setFromCamera(clickMouse, camera);
@@ -736,9 +986,7 @@ canvas.addEventListener('mouseup', (event: MouseEvent) => {
 
 // Handle window resize
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  updateViewport();
 });
 
 // Smooth camera animation — target + position

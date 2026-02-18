@@ -23,6 +23,10 @@ export class SeismicVolume {
     public readonly dimensions: SeismicDimensions;
     private colormap: Uint8Array;
 
+    // Amplitude clipping range (default: full range)
+    private clipMin: number = -1;
+    private clipMax: number = 1;
+
     // Slice meshes
     private inlineSlice: THREE.Mesh | null = null;
     private crosslineSlice: THREE.Mesh | null = null;
@@ -106,7 +110,7 @@ export class SeismicVolume {
                 const row = nz - 1 - k;
 
                 const value = this.getSample(inlineIdx, j, k);
-                const rgb = applyColormap(value, this.colormap);
+                const rgb = applyColormap(this.clipValue(value), this.colormap);
 
                 const idx = (row * ny + j) * 4;
                 pixels[idx] = rgb[0];
@@ -138,7 +142,7 @@ export class SeismicVolume {
                 const row = nz - 1 - k;
 
                 const value = this.getSample(i, crosslineIdx, k);
-                const rgb = applyColormap(value, this.colormap);
+                const rgb = applyColormap(this.clipValue(value), this.colormap);
 
                 const idx = (row * nx + i) * 4;
                 pixels[idx] = rgb[0];
@@ -170,7 +174,7 @@ export class SeismicVolume {
                 const row = ny - 1 - j;
 
                 const value = this.getSample(i, j, timeIdx);
-                const rgb = applyColormap(value, this.colormap);
+                const rgb = applyColormap(this.clipValue(value), this.colormap);
 
                 const idx = (row * nx + i) * 4;
                 pixels[idx] = rgb[0];
@@ -215,6 +219,7 @@ export class SeismicVolume {
                 });
                 this.inlineSlice = new THREE.Mesh(inlineGeom, inlineMat);
                 this.inlineSlice.rotation.y = -Math.PI / 2;
+                this.inlineSlice.userData.sliceType = 'inline';
                 this.scene.add(this.inlineSlice);
             } else {
                 // Update existing
@@ -224,6 +229,7 @@ export class SeismicVolume {
             }
             // Position
             this.inlineSlice.position.x = (inlinePos / nx - 0.5) * this.scale.x;
+            this.inlineSlice.userData.sliceIndex = inlinePos;
             this.inlineSlice.visible = true;
         } else {
             // Hide if exists
@@ -244,6 +250,7 @@ export class SeismicVolume {
                     opacity: opacity
                 });
                 this.crosslineSlice = new THREE.Mesh(crosslineGeom, crosslineMat);
+                this.crosslineSlice.userData.sliceType = 'crossline';
                 this.scene.add(this.crosslineSlice);
             } else {
                 (this.crosslineSlice.material as THREE.MeshBasicMaterial).map?.dispose();
@@ -251,6 +258,7 @@ export class SeismicVolume {
                 (this.crosslineSlice.material as THREE.MeshBasicMaterial).opacity = opacity;
             }
             this.crosslineSlice.position.z = (crosslinePos / ny - 0.5) * this.scale.z;
+            this.crosslineSlice.userData.sliceIndex = crosslinePos;
             this.crosslineSlice.visible = true;
         } else {
             if (this.crosslineSlice) {
@@ -287,10 +295,63 @@ export class SeismicVolume {
     }
 
     /**
+     * Get visible inline/crossline slice meshes for raycasting (e.g. right-click context menu).
+     * Each mesh has userData: { sliceType, sliceIndex, dimensions, scale, timeRangeMs }
+     */
+    public getSliceMeshes(): THREE.Mesh[] {
+        const meshes: THREE.Mesh[] = [];
+        if (this.inlineSlice && this.inlineSlice.visible) meshes.push(this.inlineSlice);
+        if (this.crosslineSlice && this.crosslineSlice.visible) meshes.push(this.crosslineSlice);
+        return meshes;
+    }
+
+    /**
+     * Extract raw Float32Array data for a given slice (for 2D rendering in panels/tabs).
+     */
+    public getSliceData(sliceType: 'inline' | 'crossline', index: number): { data: Float32Array; width: number; height: number } {
+        const { nx, ny, nz } = this.dimensions;
+        if (sliceType === 'inline') {
+            const data = new Float32Array(ny * nz);
+            for (let j = 0; j < ny; j++) {
+                for (let k = 0; k < nz; k++) {
+                    data[(nz - 1 - k) * ny + j] = this.getSample(index, j, k);
+                }
+            }
+            return { data, width: ny, height: nz };
+        } else {
+            const data = new Float32Array(nx * nz);
+            for (let i = 0; i < nx; i++) {
+                for (let k = 0; k < nz; k++) {
+                    data[(nz - 1 - k) * nx + i] = this.getSample(i, index, k);
+                }
+            }
+            return { data, width: nx, height: nz };
+        }
+    }
+
+    /**
      * Update the colormap
      */
     public setColormap(colormap: Uint8Array): void {
         this.colormap = colormap;
+    }
+
+    /**
+     * Set amplitude clipping range. Values outside [min, max] are clamped,
+     * and the sub-range is stretched across the full colormap.
+     */
+    public setClipRange(min: number, max: number): void {
+        this.clipMin = min;
+        this.clipMax = max;
+    }
+
+    /**
+     * Clamp value to clip range and remap to [-1, 1] for colormap lookup.
+     */
+    private clipValue(value: number): number {
+        const clamped = Math.max(this.clipMin, Math.min(this.clipMax, value));
+        const range = this.clipMax - this.clipMin;
+        return range > 0 ? ((clamped - this.clipMin) / range) * 2 - 1 : 0;
     }
 
     /**
