@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Well Field Visualization — Volve (Inspired)</title>
+    <meta name="description"
+        content="Interactive 3D visualization of a North Sea well field with trajectories, casing shoes, and drilling events" />
+</head>
+
+<body>
+    <div id="app">
+        <canvas id="well-canvas"></canvas>
+        <div id="well-info-panel" class="hidden"></div>
+        <div id="field-tooltip" class="hidden"></div>
+        <div id="loading-overlay">
+            <div class="spinner"></div>
+            <p id="loading-text">Loading well field data...</p>
+        </div>
+    </div>
+    <script type="module" src="/src/wellField.ts"></script>
+</body>
+
+</html>

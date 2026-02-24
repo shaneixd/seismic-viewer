@@ -330,6 +330,15 @@ export class SeismicVolume {
     }
 
     /**
+     * Show or hide the bounding box wireframe
+     */
+    public setBoundingBoxVisible(visible: boolean): void {
+        if (this.boundingBox) {
+            this.boundingBox.visible = visible;
+        }
+    }
+
+    /**
      * Update the colormap
      */
     public setColormap(colormap: Uint8Array): void {

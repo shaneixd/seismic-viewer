@@ -16,7 +16,7 @@ import GUI from 'lil-gui';
 // Scene setup
 const canvas = document.getElementById('seismic-canvas') as HTMLCanvasElement;
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0a12);
+scene.background = new THREE.Color(0x000000);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(
@@ -57,7 +57,7 @@ const axesHelper = new THREE.AxesHelper(1.2);
 scene.add(axesHelper);
 
 // Grid helper
-const gridHelper = new THREE.GridHelper(2, 20, 0x333355, 0x222244);
+const gridHelper = new THREE.GridHelper(4, 40, 0x333355, 0x222244);
 gridHelper.position.y = -0.5;
 scene.add(gridHelper);
 
@@ -246,6 +246,7 @@ const params = {
   showTime: true,
   colormap: 'seismic' as string,
   showAxes: false,
+  showBoundingBox: true,
   showWells: true,
   showFormations: true,
   clipMin: -1,
@@ -257,9 +258,14 @@ const params = {
 const datasetOptions: Record<string, string> = {
   'F3 Netherlands': 'f3',
   'Parihaka (NZ)': 'parihaka',
+  'Well Field (Volve)': 'wellfield',
 };
 gui.add(params, 'dataset', datasetOptions).name('Dataset').onChange((value: string) => {
-  loadSeismicData(value);
+  if (value === 'wellfield') {
+    window.location.href = '/wells.html';
+  } else {
+    loadSeismicData(value);
+  }
 });
 
 // Slices folder
@@ -281,6 +287,9 @@ displayFolder.add(params, 'colormap', colormapOptions).name('Color Scale').onCha
 });
 displayFolder.add(params, 'showAxes').name('Show Axes').onChange((value: boolean) => {
   axesHelper.visible = value;
+});
+displayFolder.add(params, 'showBoundingBox').name('Bounding Box').onChange((value: boolean) => {
+  if (seismicVolume) seismicVolume.setBoundingBoxVisible(value);
 });
 displayFolder.add(params, 'clipMin', -1, 1, 0.01).name('Clip Min').onChange(() => {
   if (seismicVolume) {

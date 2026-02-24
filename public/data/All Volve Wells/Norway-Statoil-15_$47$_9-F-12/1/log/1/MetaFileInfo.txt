@@ -1,0 +1,8 @@
+1  Real Time MWD_$47$_LWD data - 8.5in. Pilot - MD Log
+2  Mudlog RT data 26in sect - MD Log
+3  Real Time MWD_$47$_LWD Mudlog data - 17.5in. section - MD Log
+4  Real Time MWD_$47$_LWD Mudlog data - 8.5 in. section - MD Log
+5  Real Time MWD_$47$_LWD data - 36in. section - MD Log
+6  Real Time MWD_$47$_LWD Mudlog data - 12.25in. - MD Log
+7  Mudlog RT data 26in nr2 - MD Log
+8  Real Time MWD_$47$_LWD data - 26in. section - MD Log

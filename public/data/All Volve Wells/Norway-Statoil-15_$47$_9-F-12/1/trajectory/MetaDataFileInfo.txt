@@ -1,0 +1,8 @@
+1  Real Time MWD_$47$_LWD data - 8.5in. Pilot - Actual Traj (T-463826-1)
+2  Real Time MWD_$47$_LWD Mudlog data - 12.25in. - Actual Traj (T-463866-1)
+3  Real Time MWD_$47$_LWD data - 26in. section - Actual Traj (T-463864-1)
+4  Real Time MWD_$47$_LWD data - 36in. section - Actual Traj (T-463825-1)
+5  Real Time MWD_$47$_LWD Mudlog data - 17.5in. section - Actual Traj (T-483977-1)
+6  Real Time MWD_$47$_LWD Mudlog data - 8.5 in. section - Actual Traj (T-505142-1)
+7  Real Time MWD_$47$_LWD data - 8.5in. section - Actual Traj (T-463867-1)
+8  Real Time MWD_$47$_LWD data - 26in. section - Plan Traj (T-463864-2)
