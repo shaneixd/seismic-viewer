@@ -121,12 +121,9 @@ const datasetOptions: Record<string, string> = {
     'Well Field (Volve)': 'wellfield',
     'F3 Netherlands': 'f3',
     'Parihaka (NZ)': 'parihaka',
-    'Well Plan': 'wellplan',
 };
 gui.add(params, 'dataset', datasetOptions).name('Dataset').onChange((value: string) => {
-    if (value === 'wellplan') {
-        window.location.href = '/wellplan.html';
-    } else if (value !== 'wellfield') {
+    if (value !== 'wellfield') {
         window.location.href = `/?dataset=${value}`;
     }
 });

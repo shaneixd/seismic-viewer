@@ -1,0 +1,2 @@
+1  GlcSettingsLog
+2  Real Time SLB - Time Log

@@ -259,10 +259,13 @@ const datasetOptions: Record<string, string> = {
   'F3 Netherlands': 'f3',
   'Parihaka (NZ)': 'parihaka',
   'Well Field (Volve)': 'wellfield',
+  'Well Plan': 'wellplan',
 };
 gui.add(params, 'dataset', datasetOptions).name('Dataset').onChange((value: string) => {
   if (value === 'wellfield') {
     window.location.href = '/wells.html';
+  } else if (value === 'wellplan') {
+    window.location.href = '/wellplan.html';
   } else {
     loadSeismicData(value);
   }

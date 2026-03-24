@@ -1,0 +1,216 @@
+/* ── Well Plan 3D Viewer Styles ── */
+
+:root {
+    --wp-bg: #050510;
+    --wp-border: rgba(100, 140, 180, 0.15);
+    --wp-accent: #4a9eff;
+    --wp-accent2: #5ce0a0;
+    --wp-text: #e0e0e8;
+    --wp-text-dim: #8899aa;
+    --wp-text-muted: #556677;
+}
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--wp-bg);
+    font-family: 'Inter', 'SF Pro', system-ui, -apple-system, sans-serif;
+    color: var(--wp-text);
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* ── 3D Canvas ── */
+#well-canvas {
+    flex: 1;
+    display: block;
+    width: 100%;
+    min-height: 0;
+}
+
+/* ── Data Table ── */
+#table-panel {
+    height: 200px;
+    flex-shrink: 0;
+    overflow: auto;
+    background: rgba(12, 14, 28, 0.95);
+    border-top: 1px solid var(--wp-border);
+}
+
+.trajectory-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    table-layout: fixed;
+}
+
+.trajectory-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.trajectory-table th {
+    background: rgba(15, 17, 35, 0.95);
+    backdrop-filter: blur(8px);
+    color: var(--wp-text-dim);
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 10px 12px;
+    text-align: right;
+    border-bottom: 1px solid var(--wp-border);
+    white-space: nowrap;
+}
+
+.trajectory-table th:first-child {
+    text-align: left;
+}
+
+.trajectory-table td {
+    padding: 8px 12px;
+    text-align: right;
+    color: var(--wp-text-dim);
+    border-bottom: 1px solid rgba(100, 140, 180, 0.06);
+    font-variant-numeric: tabular-nums;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 11px;
+}
+
+.trajectory-table td:first-child {
+    text-align: left;
+    font-family: 'Inter', 'SF Pro', system-ui, sans-serif;
+    font-weight: 500;
+    color: var(--wp-text);
+}
+
+.trajectory-table tbody tr {
+    transition: background 0.12s ease;
+}
+
+.trajectory-table tbody tr:hover,
+.trajectory-table tbody tr.highlighted {
+    background: rgba(74, 158, 255, 0.1);
+}
+
+.trajectory-table tbody tr.highlighted td:first-child {
+    color: var(--wp-accent);
+}
+
+.target-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background: rgba(74, 158, 255, 0.12);
+    color: var(--wp-accent);
+    border: 1px solid rgba(74, 158, 255, 0.25);
+}
+
+.target-badge.bhl {
+    background: rgba(92, 224, 160, 0.12);
+    color: var(--wp-accent2);
+    border-color: rgba(92, 224, 160, 0.25);
+}
+
+.casing-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background: rgba(68, 200, 232, 0.12);
+    color: #44c8e8;
+    border: 1px solid rgba(68, 200, 232, 0.25);
+}
+
+/* ── Loading Overlay ── */
+#loading-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 5, 16, 0.97);
+    z-index: 1000;
+    gap: 20px;
+    transition: opacity 0.4s ease;
+}
+
+#loading-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(74, 158, 255, 0.2);
+    border-top: 3px solid var(--wp-accent);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#loading-text {
+    font-size: 14px;
+    color: var(--wp-text-dim);
+    letter-spacing: 0.5px;
+}
+
+/* ── Scrollbar ── */
+#table-panel::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+#table-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#table-panel::-webkit-scrollbar-thumb {
+    background: rgba(100, 140, 180, 0.2);
+    border-radius: 3px;
+}
+
+/* ── Table Wellbore Titles ── */
+.table-wellbore-title {
+    padding: 10px 12px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--wp-text);
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--wp-border);
+    background: rgba(15, 17, 35, 0.6);
+}
+
+/* ── lil-gui ── */
+.lil-gui.root {
+    z-index: 500;
+}
