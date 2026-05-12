@@ -113,16 +113,16 @@ interface CasingShoeDef {
 
 const CASING_SHOES: CasingShoeDef[] = [
     // Lateral 1 (parent well) — each starts where the previous shoe ends
-    { label: '17 1/2"', topMD: 0,    shoeMD: 2000,  wellbore: 'Lateral 1' },
-    { label: '12 1/4"', topMD: 2000, shoeMD: 2900,  wellbore: 'Lateral 1' },
-    { label: '8 1/2"',  topMD: 2900, shoeMD: 13359, wellbore: 'Lateral 1' },
+    { label: '17 1/2"', topMD: 0,    shoeMD: 1800,  wellbore: 'Lateral 1' },
+    { label: '12 1/4"', topMD: 1800, shoeMD: 3200,  wellbore: 'Lateral 1' },
+    { label: '8 1/2"',  topMD: 3200, shoeMD: 13359, wellbore: 'Lateral 1' },
     // Lateral 1B (reduced DLS variant)
-    { label: '17 1/2"', topMD: 0,    shoeMD: 1500,  wellbore: 'Lateral 1B' },
-    { label: '12 1/4"', topMD: 1500, shoeMD: 2500,  wellbore: 'Lateral 1B' },
-    { label: '8 1/2"',  topMD: 2500, shoeMD: 13359, wellbore: 'Lateral 1B' },
+    { label: '17 1/2"', topMD: 0,    shoeMD: 1400,  wellbore: 'Lateral 1B' },
+    { label: '12 1/4"', topMD: 1400, shoeMD: 3400,  wellbore: 'Lateral 1B' },
+    { label: '8 1/2"',  topMD: 3400, shoeMD: 13359, wellbore: 'Lateral 1B' },
     // Lateral 2 (sidetrack — only strings below KOP)
-    { label: '9 5/8"',  topMD: 2000, shoeMD: 3350,  wellbore: 'Lateral 2' },
-    { label: '7"',      topMD: 3350, shoeMD: 10650, wellbore: 'Lateral 2' },
+    { label: '9 5/8"',  topMD: 2000, shoeMD: 3500,  wellbore: 'Lateral 2' },
+    { label: '7"',      topMD: 3500, shoeMD: 10650, wellbore: 'Lateral 2' },
 ];
 
 // ── Minimum Curvature Interpolation ────────────────────────────
@@ -287,6 +287,13 @@ let gridHelper = new THREE.GridHelper(20, 40, new THREE.Color('#2a3955'), new TH
 gridHelper.position.y = 0.02;
 scene.add(gridHelper);
 
+let cubeHelper: THREE.Group | null = null;
+
+function updateGridVisibility() {
+    if (gridHelper) gridHelper.visible = params.gridMode === 'Surface Grid';
+    if (cubeHelper) cubeHelper.visible = params.gridMode === '3D Cube';
+}
+
 const surfaceGeo = new THREE.PlaneGeometry(30, 30);
 surfaceGeo.rotateX(-Math.PI / 2);
 const surfaceMat = new THREE.MeshPhongMaterial({
@@ -371,11 +378,12 @@ function buildTrajectory3D(): void {
             trajectoryGroup.add(tube);
         }
 
-        // ── Wellhead sphere (for wellbores originating at surface) ──
+        // ── Wellhead cone (for wellbores originating at surface) ──
         const startsAtSurface = stations[0].northing === SURFACE_NORTHING && stations[0].easting === SURFACE_EASTING && stations[0].tvd === 0;
         if (startsAtSurface) {
             const headPos = toWorld(stations[0].northing, stations[0].easting, stations[0].tvd);
-            const headGeo = new THREE.SphereGeometry(params.markerSize, 16, 16);
+            const headGeo = new THREE.ConeGeometry(params.wellheadConeSize, params.wellheadConeSize * 2, 16);
+            headGeo.translate(0, params.wellheadConeSize, 0);
             const headMat = new THREE.MeshPhongMaterial({
                 color: baseColor,
                 emissive: baseColor.clone().multiplyScalar(0.3),
@@ -411,6 +419,8 @@ function buildTrajectory3D(): void {
                 const stationIdx = Math.min(tpIdx * INTERPOLATION_STEPS, stations.length - 1);
                 const s = stations[stationIdx];
                 const pos = toWorld(s.northing, s.easting, s.tvd);
+
+                if (tpIdx === 0 && startsAtSurface) continue;
 
                 // Sphere marker
                 const markerGeo = new THREE.SphereGeometry(params.markerSize, 12, 12);
@@ -572,7 +582,6 @@ function highlightWellbore(wellbore: string | null, sectionType: string | null =
         if (!mat.isMeshPhongMaterial) return;
 
         const baseColor = new THREE.Color((params as any)[obj.userData.colorParam]);
-        const isCone = obj.name.startsWith('casing-shoe-');
         const isTargetOrb = obj.name.startsWith('target-');
 
         if (key === null) {
@@ -845,7 +854,7 @@ function rebuildTable(): void {
 const PARAMS_STORAGE_KEY = 'wellplan-params';
 
 const defaultParams = {
-    showGrid: true,
+    gridMode: 'Surface Grid' as 'Surface Grid' | '3D Cube' | 'Hidden',
     showLabels: false,
     showSurface: false,
     showLateral1: true,
@@ -855,6 +864,7 @@ const defaultParams = {
     gridColor: '#2a3955',
     tubeRadius: 0.024,
     markerSize: 0.035,
+    wellheadConeSize: 0.035,
     markerMode: 'turnPoints' as 'turnPoints' | 'casingShoes',
     casingConeSize: 0.06,
     casingConeColor: '#44c8e8',
@@ -866,6 +876,7 @@ const defaultParams = {
     targetColor: '#3ad994',
     targetSize: 0.15,
     targetOpacity: 0.25,
+    tableCollapsed: false,
 };
 
 // Load saved params, merge with defaults so new keys get default values
@@ -903,8 +914,8 @@ gui.add({ dataset: 'wellplan' }, 'dataset', datasetOptions).name('Dataset').onCh
 });
 
 const displayFolder = gui.addFolder('Display');
-displayFolder.add(params, 'showGrid').name('Grid').onChange((v: boolean) => {
-    gridHelper.visible = v;
+displayFolder.add(params, 'gridMode', ['Surface Grid', '3D Cube', 'Hidden']).name('Grid Mode').onChange(() => {
+    updateGridVisibility();
 });
 displayFolder.addColor(params, 'gridColor').name('Grid Color').onChange((v: string) => {
     scene.remove(gridHelper);
@@ -916,6 +927,17 @@ displayFolder.addColor(params, 'gridColor').name('Grid Color').onChange((v: stri
     gridHelper = new THREE.GridHelper(20, 40, new THREE.Color(v), new THREE.Color(v).multiplyScalar(0.6));
     gridHelper.position.y = 0.02;
     scene.add(gridHelper);
+    
+    if (cubeHelper) {
+        cubeHelper.children.forEach(child => {
+            if (child instanceof THREE.LineSegments) {
+                (child.material as THREE.LineBasicMaterial).color.set(v);
+            } else if (child instanceof THREE.Mesh) {
+                (child.material as THREE.MeshBasicMaterial).color.set(v);
+            }
+        });
+    }
+    updateGridVisibility();
 });
 displayFolder.add(params, 'showSurface').name('Surface Plane').onChange((v: boolean) => {
     surfacePlane.visible = v;
@@ -940,6 +962,7 @@ trajFolder.addColor(params, 'highlightColor').name('Highlight');
 trajFolder.add(params, 'tubeRadius', 0.004, 0.04, 0.002).name('Tube Radius').onChange(() => buildTrajectory3D());
 trajFolder.add(params, 'markerMode', ['turnPoints', 'casingShoes']).name('Marker Mode').onChange(() => { buildTrajectory3D(); rebuildTable(); });
 trajFolder.add(params, 'markerSize', 0.005, 0.06, 0.005).name('Marker Size').onChange(() => buildTrajectory3D());
+trajFolder.add(params, 'wellheadConeSize', 0.005, 0.1, 0.005).name('Wellhead Size').onChange(() => buildTrajectory3D());
 trajFolder.add(params, 'casingConeSize', 0.02, 0.2, 0.005).name('Cone Size').onChange(() => buildTrajectory3D());
 // casingConeColor removed — cones now use the wellbore color
 
@@ -1121,6 +1144,31 @@ function resizeRenderer(): void {
 
 window.addEventListener('resize', resizeRenderer);
 
+function syncTableToggle(): void {
+    const app = document.getElementById('app')!;
+    const toggle = document.getElementById('table-toggle') as HTMLButtonElement | null;
+    app.classList.toggle('table-collapsed', params.tableCollapsed);
+    if (toggle) {
+        toggle.textContent = params.tableCollapsed ? 'Show table' : 'Hide table';
+        toggle.setAttribute('aria-expanded', String(!params.tableCollapsed));
+    }
+    requestAnimationFrame(resizeRenderer);
+}
+
+function setupTableToggle(): void {
+    const button = document.createElement('button');
+    button.id = 'table-toggle';
+    button.type = 'button';
+    button.setAttribute('aria-controls', 'table-panel');
+    button.addEventListener('click', () => {
+        params.tableCollapsed = !params.tableCollapsed;
+        persistParams();
+        syncTableToggle();
+    });
+    document.getElementById('app')!.appendChild(button);
+    syncTableToggle();
+}
+
 // ── Animation Loop ─────────────────────────────────────────────
 
 function animate() {
@@ -1129,22 +1177,128 @@ function animate() {
     renderer.render(scene, camera);
 }
 
+function createGriddedBox(box: THREE.Box3, color: string): THREE.Group {
+    const group = new THREE.Group();
+    const min = box.min.clone().subScalar(0.5); // Add padding
+    const max = box.max.clone().addScalar(0.5);
+    const size = max.clone().sub(min);
+    const divisions = 16;
+    
+    const mat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.3 });
+
+    // Function to add a plane grid
+    const addPlaneGrid = (p0: THREE.Vector3, u: THREE.Vector3, v: THREE.Vector3) => {
+        const radius = 0.008;
+        const addThickLine = (p1: THREE.Vector3, p2: THREE.Vector3) => {
+            const dist = p1.distanceTo(p2);
+            if (dist <= 0) return;
+            const geo = new THREE.CylinderGeometry(radius, radius, dist, 4);
+            geo.rotateX(Math.PI / 2);
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(p1).lerp(p2, 0.5);
+            mesh.lookAt(p2);
+            group.add(mesh);
+        };
+
+        for (let i = 0; i <= divisions; i++) {
+            const f = i / divisions;
+            // line along u
+            addThickLine(p0.clone().add(v.clone().multiplyScalar(f)), p0.clone().add(v.clone().multiplyScalar(f)).add(u));
+            // line along v
+            addThickLine(p0.clone().add(u.clone().multiplyScalar(f)), p0.clone().add(u.clone().multiplyScalar(f)).add(v));
+        }
+    };
+
+    // Bottom (XZ plane at min.y)
+    addPlaneGrid(
+        new THREE.Vector3(min.x, min.y, min.z),
+        new THREE.Vector3(size.x, 0, 0),
+        new THREE.Vector3(0, 0, size.z)
+    );
+
+    // Back-Left (YZ plane at min.x)
+    addPlaneGrid(
+        new THREE.Vector3(min.x, min.y, min.z),
+        new THREE.Vector3(0, 0, size.z),
+        new THREE.Vector3(0, size.y, 0)
+    );
+
+    // Back-Right (XY plane at min.z)
+    addPlaneGrid(
+        new THREE.Vector3(min.x, min.y, min.z),
+        new THREE.Vector3(size.x, 0, 0),
+        new THREE.Vector3(0, size.y, 0)
+    );
+
+    // ── Axis Labels ───────────────────────────────────────────
+    function createGridLabel(text: string, position: THREE.Vector3, color: string, scale: number = 0.5): THREE.Sprite {
+        const labelCanvas = document.createElement('canvas');
+        const ctx = labelCanvas.getContext('2d')!;
+        const fontSize = 56;
+        const font = `500 ${fontSize}px Inter, system-ui, sans-serif`;
+        ctx.font = font;
+        const metrics = ctx.measureText(text);
+        const textWidth = metrics.width;
+        const padding = 4;
+        labelCanvas.width = textWidth + padding * 2;
+        labelCanvas.height = fontSize + padding * 2;
+        ctx.font = font;
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, labelCanvas.width / 2, labelCanvas.height / 2);
+        const texture = new THREE.CanvasTexture(labelCanvas);
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
+        const sprite = new THREE.Sprite(spriteMat);
+        sprite.position.copy(position);
+        const aspect = labelCanvas.width / labelCanvas.height;
+        sprite.scale.set(scale * aspect * 0.15, scale * 0.15, 1);
+        return sprite;
+    }
+
+    // Depth Labels (Y-axis) - Back Right Edge
+    for (let i = 0; i <= divisions; i++) {
+        if (i % 2 !== 0) continue;
+        const y = min.y + (size.y * i / divisions);
+        const depthVal = Math.round(-y / WORLD_SCALE);
+        group.add(createGridLabel(`${depthVal}`, new THREE.Vector3(max.x + 0.6, y, min.z), color, 0.7));
+    }
+
+    // Easting Labels (X-axis) - Bottom Front Edge
+    for (let i = 0; i <= divisions; i++) {
+        if (i % 2 !== 0) continue;
+        const x = min.x + (size.x * i / divisions);
+        const eastingVal = Math.round((x / WORLD_SCALE) + SURFACE_EASTING);
+        group.add(createGridLabel(`${eastingVal}`, new THREE.Vector3(x, min.y - 0.4, max.z + 0.5), color, 0.7));
+    }
+
+    // Northing Labels (Z-axis) - Bottom Right Edge
+    for (let i = 0; i <= divisions; i++) {
+        if (i % 2 !== 0) continue;
+        const z = min.z + (size.z * i / divisions);
+        const northingVal = Math.round((z / WORLD_SCALE) + SURFACE_NORTHING);
+        group.add(createGridLabel(`${northingVal}`, new THREE.Vector3(max.x + 0.6, min.y - 0.4, z), color, 0.7));
+    }
+
+    return group;
+}
+
 // ── Initialize ─────────────────────────────────────────────────
 
 function init(): void {
-    const tablePanel = document.getElementById('table-panel')!;
+    setupTableToggle();
     rebuildTable();
 
     // Apply restored params to scene objects
     scene.background = new THREE.Color(params.backgroundColor);
-    gridHelper.visible = params.showGrid;
     if (params.gridColor !== '#2a3955') {
         scene.remove(gridHelper);
         gridHelper.geometry.dispose();
         (Array.isArray(gridHelper.material) ? gridHelper.material : [gridHelper.material]).forEach(m => m.dispose());
         gridHelper = new THREE.GridHelper(20, 40, new THREE.Color(params.gridColor), new THREE.Color(params.gridColor).multiplyScalar(0.6));
         gridHelper.position.y = 0.02;
-        gridHelper.visible = params.showGrid;
         scene.add(gridHelper);
     }
     surfacePlane.visible = params.showSurface;
@@ -1164,6 +1318,12 @@ function init(): void {
     const center = box.getCenter(new THREE.Vector3());
     const size = box.getSize(new THREE.Vector3());
     const maxDim = Math.max(size.x, size.y, size.z);
+
+    if (!cubeHelper) {
+        cubeHelper = createGriddedBox(box, params.gridColor);
+        scene.add(cubeHelper);
+    }
+    updateGridVisibility();
 
     controls.target.copy(center);
     camera.position.set(
